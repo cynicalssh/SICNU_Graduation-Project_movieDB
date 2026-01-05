@@ -1,0 +1,10 @@
+<view class="skin-list">
+    <block wx:for="{{skinList}}" wx:for-item="skinItem" wx:for-index="skinIndex" wx:key="skin">
+        <view class="skin-item {{nowSkin == skinItem.imgUrl ? 'skin-item-active' : ''}}" 
+              data-url="{{skinItem.imgUrl}}" 
+              bindtap="chooseSkin"
+              style="{{skinItem.imgUrl.indexOf('linear-gradient') !== -1 ? 'background: ' + skinItem.imgUrl : 'background-image: url(' + skinItem.imgUrl + ')'}}">
+            <view class="skin-title">{{skinItem.title}}</view>
+        </view>
+    </block>
+</view>
