@@ -1,0 +1,44 @@
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input class="search-input" placeholder="请输入城市名称查询" value="{{searchKeyword}}" bindinput="onSearchInput" bindconfirm="onSearchConfirm"/>
+  </view>
+  
+  <!-- 当前城市 -->
+  <view class="section">
+    <view class="section-title">当前城市</view>
+    <view class="city-item current-city" bindtap="selectCity" data-city="{{currentCity}}">
+      {{currentCity || '未设置'}}
+    </view>
+  </view>
+  
+  <!-- 热门城市 -->
+  <view class="section">
+    <view class="section-title">热门城市</view>
+    <view class="city-grid">
+      <view class="city-item" wx:for="{{hotCities}}" wx:key="index" bindtap="selectCity" data-city="{{item}}">
+        {{item}}
+      </view>
+    </view>
+  </view>
+  
+  <!-- 城市列表 -->
+  <scroll-view class="city-list" scroll-y="true" scroll-into-view="{{scrollIntoView}}" scroll-with-animation="true">
+    <view wx:for="{{cityGroups}}" wx:key="letter" class="city-group" id="letter-{{item.letter}}">
+      <view class="city-letter">{{item.letter}}</view>
+      <view class="city-items">
+        <view class="city-item" wx:for="{{item.cities}}" wx:for-item="city" wx:key="city" bindtap="selectCity" data-city="{{city}}">
+          {{city}}
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+  
+  <!-- 字母索引 -->
+  <view class="letter-index">
+    <view class="letter-item" wx:for="{{letters}}" wx:key="index" bindtap="scrollToLetter" data-letter="{{item}}">
+      {{item}}
+    </view>
+  </view>
+</view>
+

@@ -21,6 +21,7 @@ function fetchFilms(url, start, count, cb, fail_cb) {
       header: {
         "Content-Type": "application/json"
       },
+      timeout: 30000,  // 设置30秒超时
       success: function(res){
         console.log('TMDB API响应:', res)
         // 检查响应数据格式
@@ -125,6 +126,7 @@ function fetchFilmDetail(url, id, cb) {
     header: {
       "Content-Type": "application/json"
     },
+    timeout: 30000,  // 设置30秒超时
     success: function(res){
       console.log('TMDB电影详情响应:', res)
       if (res.statusCode === 200 && res.data) {
@@ -193,6 +195,7 @@ function fetchPersonDetail(url, id, cb) {
     header: {
       "Content-Type": "application/json"
     },
+    timeout: 30000,  // 设置30秒超时
     success: function(res){
       console.log('TMDB人物详情响应:', res)
       if (res.statusCode === 200 && res.data) {
@@ -283,6 +286,7 @@ function search(url, keyword, start, count, cb){
       header: {
         "Content-Type": "application/json"
       },
+      timeout: 30000,  // 设置30秒超时
       success: function(res){
         console.log('TMDB搜索响应:', res)
         if (res.statusCode === 200 && res.data && res.data.results) {

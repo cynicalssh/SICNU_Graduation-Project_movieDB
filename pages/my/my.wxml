@@ -1,7 +1,7 @@
 <view class="container">
     <view class="user-info" style="{{skin.indexOf('linear-gradient') !== -1 ? 'background: ' + skin : 'background-image: url(' + skin + ')'}}">
         <view class="user-skin" bindtap="viewSkin"></view>
-        <image src="{{userInfo.avatarUrl || '/resource/logo.png'}}" class="user-avatar" binderror="onAvatarError"></image>
+        <image src="{{userInfo.avatarUrl || '/resource/logo.png'}}" class="user-avatar" binderror="onAvatarError" bindtap="onAvatarTap"></image>
         <view class="user-nickname">
             {{userInfo.nickName}}
             <block wx:if="{{userInfo.gender == 1}}">

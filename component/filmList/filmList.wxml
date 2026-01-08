@@ -1,28 +1,61 @@
+<wxs module="starUtil">
+function getStarFill(starIndex, rating) {
+  if (starIndex <= rating) {
+    return '100%'
+  } else if (starIndex - rating < 1) {
+    var fillPercent = (1 - (starIndex - rating)) * 100
+    return fillPercent + '%'
+  } else {
+    return '0%'
+  }
+}
+module.exports = {
+  getStarFill: getStarFill
+}
+</wxs>
+
 <template name="filmList">
 <block wx:if="{{showLoading}}">
-    <view class="loading">玩命加载中…</view>
+    <view class="loading">
+        <text>玩命加载中…</text>
+    </view>
 </block>
 <block wx:else>
     <view class="film">
         <block wx:for="{{films}}" wx:for-index="filmIndex" wx:for-item="filmItem" wx:key="film">
-            <view data-id="{{filmItem.id}}" class="film-item" catchtap="viewFilmDetail">
-                <view class="film-cover">
-                    <image src="{{filmItem.images.large || filmItem.images.medium || ''}}" class="film-cover-img" mode="aspectFill" binderror="onImageError"></image>
-                    <view class="film-rating">
-                        <block wx:if="{{filmItem.rating.average == 0}}">
-                            暂无评分
-                        </block>
-                        <block wx:else>
-                            {{filmItem.rating.average}}分
-                        </block>
-                    </view>
+            <view class="film-item">
+                <view class="film-poster">
+                    <image src="{{filmItem.images.large || filmItem.images.medium || ''}}" class="film-poster-img" mode="aspectFill" binderror="onImageError"></image>
                 </view>
-                <view class="file-intro">
+                <view class="film-info">
                     <view class="film-title">{{filmItem.title}}</view>
-                    <view class="film-tag">
-                        <view class="film-tag-item" wx:for="{{filmItem.genres}}" wx:for-item="filmTagItem" wx:key="filmTag" data-tag="{{filmTagItem}}" catchtap="viewFilmByTag">
-                            {{filmTagItem}}
+                    <view class="film-rating-section">
+                        <view class="film-rating-score">{{filmItem.rating.average > 0 ? filmItem.rating.average : '暂无'}}</view>
+                        <view class="film-stars" wx:if="{{filmItem.rating.average > 0}}">
+                            <view class="star-wrapper" wx:for="{{[1,2,3,4,5]}}" wx:key="star" wx:for-item="starIndex">
+                                <view class="star-bg">
+                                    <text class="star-icon star-empty">☆</text>
+                                </view>
+                                <view class="star-fill" style="width: {{starUtil.getStarFill(starIndex, filmItem.rating.average)}}">
+                                    <text class="star-icon star-filled">★</text>
+                                </view>
+                            </view>
                         </view>
+                    </view>
+                    <view class="film-cast" wx:if="{{filmItem.casts && filmItem.casts.length > 0}}">
+                        <text class="film-cast-label">主演：</text>
+                        <text class="film-cast-names">
+                            <block wx:for="{{filmItem.casts}}" wx:for-item="castItem" wx:for-index="castIndex" wx:key="cast">
+                                {{castItem.name}}<text wx:if="{{castIndex < filmItem.casts.length - 1}}"> / </text>
+                            </block>
+                        </text>
+                    </view>
+                    <view class="film-release" wx:if="{{filmItem.release_date}}">
+                        <text class="film-release-date">{{filmItem.release_date}}</text>
+                        <text class="film-release-text"> 上映</text>
+                    </view>
+                    <view class="film-actions">
+                        <button class="film-buy-btn" data-id="{{filmItem.id}}" catchtap="viewFilmDetail">购票</button>
                     </view>
                 </view>
             </view>

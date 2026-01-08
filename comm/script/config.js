@@ -12,6 +12,11 @@ skinList: “我的”页面背景列表
 // 静态资源地址
 var staticUrl = 'https://static.sesine.com/wechat-weapp-movie'
 
+// ========== 后端API配置 ==========
+// 后端服务地址（开发环境）
+var backendApiUrl = 'http://localhost:8080/api'
+// 生产环境请修改为：var backendApiUrl = 'https://your-domain.com/api'
+
 // ========== TMDB API 配置 ==========
 // TMDB API基础地址
 var tmdbApiUrl = 'https://api.themoviedb.org/3'
@@ -36,6 +41,9 @@ module.exports = {
     city: '',
     count: 20,
     baiduAK: 'Y1R5guY8Y2GNRdDpLz7SUeM3QgADAXec',
+    tencentKey: 'OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-W6BFI',  // 腾讯地图Key（公开测试Key，建议替换为自己的）
+    amapKey: '9dfa3c1150ad05258c5626ffe10c227a',  // 高德地图Key（免费申请：https://console.amap.com/dev/key/app）
+    backendApiUrl: backendApiUrl,
     tmdbApiKey: tmdbApiKey,
     apiList: {
         popular: tmdbApiList.popular,
@@ -48,7 +56,9 @@ module.exports = {
         filmDetail: tmdbApiList.filmDetail,
         personDetail: tmdbApiList.personDetail,
         genreList: tmdbApiList.genreList,
-        baiduMap: 'https://api.map.baidu.com/geocoder/v2/'
+        baiduMap: 'https://api.map.baidu.com/geocoder/v2/',
+        tencentMap: 'https://apis.map.qq.com/ws/geocoder/v1/',  // 腾讯地图逆地理编码API
+        amapGeocode: 'https://restapi.amap.com/v3/geocode/regeo'  // 高德地图逆地理编码API
     },
     hotKeyword: ['功夫熊猫', '烈日灼心', '摆渡人', '长城', '我不是潘金莲', '这个杀手不太冷', '驴得水', '海贼王之黄金城', '西游伏妖片', '我在故宫修文物', '你的名字'],
     hotTag: ['动作', '喜剧', '爱情', '悬疑'],

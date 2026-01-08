@@ -16,6 +16,22 @@ function convertFilmItem(tmdbFilm) {
   var backdropUrl = tmdbFilm.backdrop_path ? (TMDB_IMAGE_BASE_LARGE.replace('w780', 'w1280') + tmdbFilm.backdrop_path) : ''
   var posterUrl = tmdbFilm.poster_path ? (TMDB_IMAGE_BASE_LARGE + tmdbFilm.poster_path) : ''
   
+  // 处理演员信息（列表API可能不包含，需要从详情API获取）
+  var casts = []
+  if (tmdbFilm.credits && tmdbFilm.credits.cast) {
+    casts = tmdbFilm.credits.cast.slice(0, 5).map(function(person) {
+      return {
+        id: person.id,
+        name: person.name,
+        avatars: {
+          large: person.profile_path ? (TMDB_IMAGE_BASE_LARGE + person.profile_path) : '',
+          medium: person.profile_path ? (TMDB_IMAGE_BASE + person.profile_path) : '',
+          small: person.profile_path ? (TMDB_IMAGE_BASE + person.profile_path) : ''
+        }
+      }
+    })
+  }
+  
   return {
     id: tmdbFilm.id,
     title: tmdbFilm.title || tmdbFilm.name || '',
@@ -26,13 +42,15 @@ function convertFilmItem(tmdbFilm) {
       backdrop: backdropUrl || posterUrl  // 用于轮播图
     },
     rating: {
-      average: tmdbFilm.vote_average ? (tmdbFilm.vote_average / 2).toFixed(1) : 0,
+      average: tmdbFilm.vote_average ? parseFloat((tmdbFilm.vote_average / 2).toFixed(1)) : 0,
       stars: tmdbFilm.vote_average ? Math.round(tmdbFilm.vote_average / 2) : 0,
       min: 0,
       max: 5
     },
     genres: tmdbFilm.genre_names || (tmdbFilm.genres ? tmdbFilm.genres.map(function(g) { return g.name }) : []),
     year: tmdbFilm.release_date ? tmdbFilm.release_date.split('-')[0] : (tmdbFilm.first_air_date ? tmdbFilm.first_air_date.split('-')[0] : ''),
+    release_date: tmdbFilm.release_date || tmdbFilm.first_air_date || '',
+    casts: casts,
     collect_count: tmdbFilm.popularity ? Math.round(tmdbFilm.popularity) : 0,
     wish_count: 0, // TMDB没有这个字段
     ratings_count: tmdbFilm.vote_count || 0

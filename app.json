@@ -17,7 +17,8 @@
     "pages/editPersonInfo/editPersonInfo",
     "pages/systemInfo/systemInfo",
     "pages/about/about",
-    "pages/location/location"
+    "pages/location/location",
+    "pages/citySelect/citySelect"
   ],
   "window": {
     "navigationBarBackgroundColor": "#47a86c",
@@ -38,18 +39,6 @@
       "selectedIconPath": "dist/images/popular_active_icon.png",
       "text": "热映"
     }, {
-      "pagePath": "pages/coming/coming",
-      "iconPath": "dist/images/coming_icon.png",
-      "selectedIconPath": "dist/images/coming_active_icon.png",
-      "text": "待映"
-    },
-    {
-      "pagePath": "pages/top/top",
-      "iconPath": "dist/images/top_icon.png",
-      "selectedIconPath": "dist/images/top_active_icon.png",
-      "text": "口碑"
-    },
-    {
       "pagePath": "pages/my/my",
       "iconPath": "dist/images/my_icon.png",
       "selectedIconPath": "dist/images/my_active_icon.png",
@@ -57,8 +46,16 @@
     }]
   },
   "networkTimeout": {
-    "request": 10000,
-    "downloadFile": 10000
+    "request": 30000,
+    "downloadFile": 30000
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于为你推荐附近的电影"
+    }
   },
   "debug": true
 }

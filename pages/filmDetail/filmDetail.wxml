@@ -7,7 +7,7 @@
         <view class="fd-hd">
             <view class="fd-hd-bg" style="background-image: url({{filmDetail.images.large}})"></view>
             <image src="{{filmDetail.images.large}}" class="fd-cover"></image>
-            <view class="fd-intro">
+            <scroll-view class="fd-intro" scroll-y="true" enable-back-to-top="true">
                 <view class="fd-title">{{filmDetail.title}}</view>
                 <view class="fd-intro-txt">导演：{{filmDetail.directors[0].name}}</view>
                 <view class="fd-intro-txt">演员：
@@ -25,7 +25,7 @@
                     </block>
                 </view>
                 <view class="fd-intro-txt">上映年份：{{filmDetail.year}}年</view>
-            </view>
+            </scroll-view>
             <view class="fd-favorite {{isFilmFavorite ? 'fd-favorite-active' : ''}}" bindtap="favoriteFilm">收藏</view>
         </view>
         <view class="fd-data">

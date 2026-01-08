@@ -1,7 +1,15 @@
-<block wx:if="{{! showLoading}}">
-<view class="search-bar">
-    <input class="search-txt" placeholder-class="search-txt-plc" bindfocus="viewSearch" placeholder="请输入关键词搜索" type="text"/>
+<view class="header-bar">
+    <view class="city-selector" bindtap="viewCitySelect">
+        <text class="city-icon">📍</text>
+        <text class="city-name">{{currentCity || '定位中'}}</text>
+        <text class="city-arrow">▼</text>
+    </view>
+    <view class="search-bar">
+        <input class="search-txt" placeholder-class="search-txt-plc" bindfocus="viewSearch" placeholder="请输入关键词搜索" type="text"/>
+    </view>
 </view>
+<view class="content-wrapper">
+<!-- 轮播图（始终显示） -->
 <swiper class="banner" indicator-dots="true" autoplay="true" circular="true" interval="3000" duration="500" wx:if="{{bannerList.length > 0}}">
     <block wx:for="{{bannerList}}" wx:for-item="bannerItem" wx:for-index="bannerIndex" wx:key="banner">
         <swiper-item data-type="{{bannerItem.type}}" data-id="{{bannerItem.id}}" bindtap="viewBannerDetail">
@@ -9,8 +17,20 @@
         </swiper-item>
     </block>
 </swiper>
-</block>
+<!-- Tab导航栏 -->
+<view class="tab-bar">
+    <view class="tab-item {{currentTab === 'popular' ? 'active' : ''}}" bindtap="switchTab" data-tab="popular">
+        热映中
+    </view>
+    <view class="tab-item {{currentTab === 'coming' ? 'active' : ''}}" bindtap="switchTab" data-tab="coming">
+        待上映
+    </view>
+    <view class="tab-item {{currentTab === 'top' ? 'active' : ''}}" bindtap="switchTab" data-tab="top">
+        口碑
+    </view>
+</view>
 <import src="../../component/filmList/filmList.wxml"/>
 <template is="filmList" data="{{films: films, hasMore: hasMore, showLoading: showLoading}}"/>
 <import src="../../component/message/message.wxml"/>
 <template is="message" data="{{message: message}}"/>
+</view>
