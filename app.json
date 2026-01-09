@@ -18,7 +18,9 @@
     "pages/systemInfo/systemInfo",
     "pages/about/about",
     "pages/location/location",
-    "pages/citySelect/citySelect"
+    "pages/citySelect/citySelect",
+    "pages/cinema/cinema",
+    "pages/districtSelect/districtSelect"
   ],
   "window": {
     "navigationBarBackgroundColor": "#47a86c",
@@ -30,14 +32,19 @@
   },
   "tabBar": {
     "color": "#686868",
-    "selectedColor": "#47a86c",
+    "selectedColor": "#ff6b35",
     "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [{
       "pagePath": "pages/popular/popular",
       "iconPath": "dist/images/popular_icon.png",
       "selectedIconPath": "dist/images/popular_active_icon.png",
-      "text": "热映"
+      "text": "电影"
+    }, {
+      "pagePath": "pages/cinema/cinema",
+      "iconPath": "dist/images/cinema_icon.png",
+      "selectedIconPath": "dist/images/cinema_active_icon.png",
+      "text": "影院"
     }, {
       "pagePath": "pages/my/my",
       "iconPath": "dist/images/my_icon.png",

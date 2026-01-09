@@ -148,10 +148,11 @@ Page({
   // 请求位置信息
   requestLocationInfo: function() {
     var that = this
-    app.getCity(function(city) {
-      // 获取城市成功
+    app.getCity(function(city, district) {
+      // 获取城市成功（district参数不使用，但会保存到全局数据中）
       var locationInfo = {
-        city: city,
+        city: city || '',
+        district: district || '',
         updateTime: Date.now()
       }
       app.globalData.userLocation = locationInfo
@@ -176,7 +177,7 @@ Page({
         })
       }
       
-      console.log('位置信息获取成功:', city)
+      console.log('位置信息获取成功:', city, district || '')
     }, function() {
       console.warn('位置信息获取失败')
     })

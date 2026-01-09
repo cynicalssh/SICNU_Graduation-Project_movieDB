@@ -1,0 +1,20 @@
+<view class="container">
+  <!-- 当前城市 -->
+  <view class="section">
+    <view class="section-title">当前城市：{{currentCity}}</view>
+  </view>
+  
+  <!-- 区域列表 -->
+  <scroll-view class="district-list" scroll-y="true">
+    <view class="district-item {{currentDistrict === item ? 'active' : ''}}" 
+          wx:for="{{districtList}}" 
+          wx:key="index" 
+          wx:for-item="item"
+          data-district="{{item}}" 
+          bindtap="selectDistrict">
+      {{item}}
+      <text class="check-icon" wx:if="{{currentDistrict === item}}">✓</text>
+    </view>
+  </scroll-view>
+</view>
+

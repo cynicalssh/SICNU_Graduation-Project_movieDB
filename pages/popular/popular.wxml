@@ -9,7 +9,7 @@
     </view>
 </view>
 <view class="content-wrapper">
-<!-- 轮播图（始终显示） -->
+<!-- 轮播图（在tab栏之上，所有tab都显示） -->
 <swiper class="banner" indicator-dots="true" autoplay="true" circular="true" interval="3000" duration="500" wx:if="{{bannerList.length > 0}}">
     <block wx:for="{{bannerList}}" wx:for-item="bannerItem" wx:for-index="bannerIndex" wx:key="banner">
         <swiper-item data-type="{{bannerItem.type}}" data-id="{{bannerItem.id}}" bindtap="viewBannerDetail">
@@ -19,18 +19,40 @@
 </swiper>
 <!-- Tab导航栏 -->
 <view class="tab-bar">
-    <view class="tab-item {{currentTab === 'popular' ? 'active' : ''}}" bindtap="switchTab" data-tab="popular">
+    <view class="tab-item {{swiperCurrent === 0 ? 'active' : ''}}" bindtap="switchTab" data-tab="popular" data-index="0">
         热映中
     </view>
-    <view class="tab-item {{currentTab === 'coming' ? 'active' : ''}}" bindtap="switchTab" data-tab="coming">
+    <view class="tab-item {{swiperCurrent === 1 ? 'active' : ''}}" bindtap="switchTab" data-tab="coming" data-index="1">
         待上映
     </view>
-    <view class="tab-item {{currentTab === 'top' ? 'active' : ''}}" bindtap="switchTab" data-tab="top">
+    <view class="tab-item {{swiperCurrent === 2 ? 'active' : ''}}" bindtap="switchTab" data-tab="top" data-index="2">
         口碑
     </view>
 </view>
-<import src="../../component/filmList/filmList.wxml"/>
-<template is="filmList" data="{{films: films, hasMore: hasMore, showLoading: showLoading}}"/>
+<!-- Swiper内容区域，支持左右滑动切换 -->
+<swiper class="tab-swiper" current="{{swiperCurrent}}" bindchange="onSwiperChange" duration="300">
+    <!-- 热映中 -->
+    <swiper-item>
+        <scroll-view class="swiper-content" scroll-y="true" enable-back-to-top="true" show-scrollbar="false" enable-flex="true">
+            <import src="../../component/filmList/filmList.wxml"/>
+            <template is="filmList" data="{{films: popularFilms, hasMore: popularHasMore, showLoading: popularShowLoading}}"/>
+        </scroll-view>
+    </swiper-item>
+    <!-- 待上映 -->
+    <swiper-item>
+        <scroll-view class="swiper-content" scroll-y="true" enable-back-to-top="true" show-scrollbar="false" enable-flex="true">
+            <import src="../../component/filmList/filmList.wxml"/>
+            <template is="filmList" data="{{films: comingFilms, hasMore: comingHasMore, showLoading: comingShowLoading}}"/>
+        </scroll-view>
+    </swiper-item>
+    <!-- 口碑 -->
+    <swiper-item>
+        <scroll-view class="swiper-content" scroll-y="true" enable-back-to-top="true" show-scrollbar="false" enable-flex="true">
+            <import src="../../component/filmList/filmList.wxml"/>
+            <template is="filmList" data="{{films: topFilms, hasMore: topHasMore, showLoading: topShowLoading}}"/>
+        </scroll-view>
+    </swiper-item>
+</swiper>
 <import src="../../component/message/message.wxml"/>
 <template is="message" data="{{message: message}}"/>
 </view>

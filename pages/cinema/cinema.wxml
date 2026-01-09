@@ -1,0 +1,78 @@
+<!-- 顶部筛选栏 -->
+<view class="filter-bar">
+  <view class="filter-item filter-item-gradient" bindtap="selectCity">
+    <view class="filter-icon-wrapper">
+      <text class="filter-icon">📍</text>
+    </view>
+    <text class="filter-text">{{currentCity || '定位中'}}</text>
+    <text class="filter-arrow">▼</text>
+  </view>
+  <view class="filter-item filter-item-gradient" bindtap="selectDistrict">
+    <view class="filter-icon-wrapper">
+      <text class="filter-icon">🗺️</text>
+    </view>
+    <text class="filter-text">{{currentDistrict}}</text>
+    <text class="filter-arrow">▼</text>
+  </view>
+  <view class="search-icon-wrapper" bindtap="onSearchFocus">
+    <view class="search-icon-bg">
+      <text class="search-icon">🔍</text>
+    </view>
+  </view>
+</view>
+
+<!-- 内容区域 -->
+<view class="content-wrapper">
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-container" wx:if="{{!loading && showEmpty}}">
+    <view class="empty-icon-wrapper">
+      <view class="empty-icon-bg">
+        <text class="empty-icon">🎬</text>
+      </view>
+    </view>
+    <text class="empty-text">~ 没有影院数据 ~</text>
+    <text class="empty-hint">换个城市试试吧</text>
+  </view>
+
+  <!-- 影院列表 -->
+  <scroll-view class="cinema-list" scroll-y="true" wx:if="{{!loading && !showEmpty && cinemaList.length > 0}}">
+    <view class="cinema-item" wx:for="{{cinemaList}}" wx:key="id" data-id="{{item.id}}" bindtap="viewCinemaDetail">
+      <view class="cinema-left">
+        <view class="cinema-icon-wrapper">
+          <text class="cinema-icon">🎬</text>
+        </view>
+      </view>
+      <view class="cinema-info">
+        <view class="cinema-name-wrapper">
+          <text class="cinema-name">{{item.name}}</text>
+          <view class="cinema-badge" wx:if="{{item.distance && parseFloat(item.distance) < 1}}">近</view>
+        </view>
+        <view class="cinema-address-wrapper">
+          <text class="address-icon">📍</text>
+          <text class="cinema-address">{{item.address}}</text>
+        </view>
+        <view class="cinema-tags">
+          <text class="tag tag-gradient" wx:for="{{item.tags}}" wx:key="index" wx:for-item="tag">{{tag}}</text>
+        </view>
+        <view class="cinema-distance" wx:if="{{item.distance}}">
+          <text class="distance-icon">🚶</text>
+          <text class="distance-text">距离您 {{item.distance}}</text>
+        </view>
+      </view>
+      <view class="cinema-price-wrapper" wx:if="{{item.minPrice}}">
+        <view class="cinema-price">
+          <text class="price-symbol">¥</text>
+          <text class="price-value">{{item.minPrice}}</text>
+          <text class="price-unit">起</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>
+

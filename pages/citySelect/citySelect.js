@@ -143,9 +143,10 @@ Page({
     
     var that = this
     
-    // 保存到全局数据
+    // 保存到全局数据（手动选择城市时，清空区县信息）
     var locationInfo = {
       city: city,
+      district: '',  // 手动选择城市时，清空区县信息
       updateTime: Date.now()
     }
     app.globalData.userLocation = locationInfo

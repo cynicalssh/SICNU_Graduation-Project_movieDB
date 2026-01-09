@@ -39,10 +39,11 @@ App({
       },
       complete: function() {
         // 获取当前位置（如果缓存不存在或已过期）
-        that.getCity(function(city) {
+        that.getCity(function(city, district) {
           // 获取城市成功，保存到全局数据和缓存
           var locationInfo = {
-            city: city,
+            city: city || '',
+            district: district || '',
             updateTime: Date.now()
           }
           that.globalData.userLocation = locationInfo
@@ -56,6 +57,7 @@ App({
           // 即使失败，也设置一个默认值，避免后续重复请求
           var defaultLocation = {
             city: '',
+            district: '',
             updateTime: Date.now()
           }
           that.globalData.userLocation = defaultLocation
@@ -197,16 +199,16 @@ App({
         var longitude = locationRes.longitude
         
         // 按顺序尝试：高德地图 -> 腾讯地图 -> 百度地图
-        that.getCityFromAmap(latitude, longitude, function(city) {
-          typeof cb == "function" && cb(city)
+        that.getCityFromAmap(latitude, longitude, function(locationData) {
+          typeof cb == "function" && cb(locationData.city, locationData.district)
         }, function() {
           // 高德地图失败，尝试腾讯地图
-          that.getCityFromTencent(latitude, longitude, function(city) {
-            typeof cb == "function" && cb(city)
+          that.getCityFromTencent(latitude, longitude, function(locationData) {
+            typeof cb == "function" && cb(locationData.city, locationData.district)
           }, function() {
             // 腾讯地图失败，尝试百度地图
-            that.getCityFromBaidu(latitude, longitude, function(city) {
-              typeof cb == "function" && cb(city)
+            that.getCityFromBaidu(latitude, longitude, function(locationData) {
+              typeof cb == "function" && cb(locationData.city, locationData.district)
             }, function() {
               // 所有API都失败
               console.error('所有地图API都失败，无法获取城市信息')
@@ -253,12 +255,22 @@ App({
         if (res.data && res.data.status === '1' && res.data.regeocode && res.data.regeocode.addressComponent) {
           var addressComponent = res.data.regeocode.addressComponent
           var city = addressComponent.city || addressComponent.district || addressComponent.adcode || ''
+          var district = addressComponent.district || addressComponent.adcode || ''
+          
           if (city && city !== '[]') {
             // 移除城市名称末尾的"市"、"区"、"县"等字
             city = city.replace(/[市县区]$/, '')
             config.city = city
-            console.log('成功获取城市（高德地图）:', city)
-            typeof cb == "function" && cb(city)
+            
+            // 处理区县信息：移除末尾的"区"、"县"、"市"等字
+            if (district && district !== '[]') {
+              district = district.replace(/[市县区]$/, '')
+            } else {
+              district = ''
+            }
+            
+            console.log('成功获取城市和区县（高德地图）:', city, district)
+            typeof cb == "function" && cb({city: city, district: district})
             return
           }
         }
@@ -303,11 +315,21 @@ App({
         if (res.data && res.data.status === 0 && res.data.result && res.data.result.address_component) {
           var addressComponent = res.data.result.address_component
           var city = addressComponent.city || addressComponent.district || ''
+          var district = addressComponent.district || ''
+          
           if (city) {
             city = city.replace(/[市县区]$/, '')
             config.city = city
-            console.log('成功获取城市（腾讯地图）:', city)
-            typeof cb == "function" && cb(city)
+            
+            // 处理区县信息
+            if (district) {
+              district = district.replace(/[市县区]$/, '')
+            } else {
+              district = ''
+            }
+            
+            console.log('成功获取城市和区县（腾讯地图）:', city, district)
+            typeof cb == "function" && cb({city: city, district: district})
             return
           }
         }
@@ -336,12 +358,23 @@ App({
       success: function(res){
         console.log('百度地图API响应（备用方案）:', res.data)
         if (res.data && res.data.status === 0 && res.data.result && res.data.result.addressComponent) {
-          var city = res.data.result.addressComponent.city
+          var addressComponent = res.data.result.addressComponent
+          var city = addressComponent.city || ''
+          var district = addressComponent.district || ''
+          
           if (city) {
             city = city.replace(/市$/, '')
             config.city = city
-            console.log('成功获取城市（百度地图）:', city)
-            typeof cb == "function" && cb(city)
+            
+            // 处理区县信息
+            if (district) {
+              district = district.replace(/[市县区]$/, '')
+            } else {
+              district = ''
+            }
+            
+            console.log('成功获取城市和区县（百度地图）:', city, district)
+            typeof cb == "function" && cb({city: city, district: district})
             return
           }
         }

@@ -4,10 +4,22 @@ var app = getApp()
 Page({
 	data: {
 		currentTab: 'popular',  // 'popular'、'coming' 或 'top'
-		films: [],
-		hasMore: true,
-		showLoading: true,
-		start: 0,
+		swiperCurrent: 0,  // swiper当前索引 0:热映中, 1:待上映, 2:口碑
+		// 热映中数据
+		popularFilms: [],
+		popularHasMore: true,
+		popularShowLoading: true,
+		popularStart: 0,
+		// 待上映数据
+		comingFilms: [],
+		comingHasMore: true,
+		comingShowLoading: false,
+		comingStart: 0,
+		// 口碑数据
+		topFilms: [],
+		topHasMore: true,
+		topShowLoading: false,
+		topStart: 0,
 		bannerList: [],  // 从电影列表中动态获取
 		currentCity: ''  // 当前城市
 	},
@@ -25,8 +37,8 @@ Page({
 		
 		// 尝试获取城市信息（异步，不阻塞数据加载）
 		app.getCity(
-			function(city){
-				// 定位成功，更新标题和页面显示
+			function(city, district){
+				// 定位成功，更新标题和页面显示（district参数不使用，保持兼容）
 				if (city && city.trim() !== '') {
 					that.setData({
 						currentCity: city
@@ -48,23 +60,51 @@ Page({
 		that.loadFilms('popular')
 	},
 	
-	// 切换Tab
+	// Swiper切换事件
+	onSwiperChange: function(e) {
+		var that = this
+		var current = e.detail.current
+		var tabMap = ['popular', 'coming', 'top']
+		var tab = tabMap[current]
+		
+		that.setData({
+			swiperCurrent: current,
+			currentTab: tab
+		})
+		
+		// 切换到新tab时，如果数据未加载，则加载数据
+		that.loadTabData(tab)
+	},
+	
+	// 切换Tab（点击tab栏）
 	switchTab: function(e) {
+		var that = this
 		var tab = e.currentTarget.dataset.tab
-		if (tab === this.data.currentTab) {
+		var index = parseInt(e.currentTarget.dataset.index)
+		
+		if (index === that.data.swiperCurrent) {
 			return
 		}
 		
-		this.setData({
-			currentTab: tab,
-			films: [],
-			hasMore: true,
-			showLoading: true,
-			start: 0
-			// 不清空轮播图，保持显示
+		that.setData({
+			swiperCurrent: index,
+			currentTab: tab
 		})
 		
-		this.loadFilms(tab)
+		// 切换到新tab时，如果数据未加载，则加载数据
+		that.loadTabData(tab)
+	},
+	
+	// 加载Tab数据（如果未加载则加载）
+	loadTabData: function(tab) {
+		var that = this
+		var dataKey = tab + 'Films'
+		var loadingKey = tab + 'ShowLoading'
+		
+		// 如果该tab的数据为空且未在加载中，则加载数据
+		if (that.data[dataKey].length === 0 && !that.data[loadingKey]) {
+			that.loadFilms(tab)
+		}
 	},
 	
 	// 加载电影列表
@@ -95,52 +135,169 @@ Page({
 			})
 		}
 		
+		// 设置对应tab的loading状态
+		var loadingKey = tab + 'ShowLoading'
+		var startKey = tab + 'Start'
+		that.setData({
+			[loadingKey]: true
+		})
+		
 		wx.showNavigationBarLoading()
-		douban.fetchFilms.call(that, apiUrl, that.data.start, null, function(data) {
+		
+		// 存储原始的 setData 方法
+		var originalSetData = that.setData
+		
+		// 包装 setData 方法，使其能够更新 tab 对应的数据
+		var wrappedSetData = function(obj) {
+			var mappedObj = {}
+			// 将 films, hasMore, showLoading, start 映射到 tab 对应的数据
+			if (obj.films !== undefined) mappedObj[tab + 'Films'] = obj.films
+			if (obj.hasMore !== undefined) mappedObj[tab + 'HasMore'] = obj.hasMore
+			if (obj.showLoading !== undefined) mappedObj[tab + 'ShowLoading'] = obj.showLoading
+			if (obj.start !== undefined) mappedObj[tab + 'Start'] = obj.start
+			
+			// 调用原始的 setData 更新所有数据
+			originalSetData.call(that, { ...obj, ...mappedObj })
+		}
+		
+		// 临时替换 setData 方法，并临时设置数据键以便fetchFilms读取
+		that.setData = wrappedSetData
+		
+		// 临时设置数据键，让fetchFilms能够正确读取
+		var tempData = {
+			films: that.data[tab + 'Films'] || [],
+			hasMore: that.data[tab + 'HasMore'] !== false,
+			showLoading: that.data[tab + 'ShowLoading'] || false,
+			start: that.data[startKey] || 0
+		}
+		
+		// 临时保存原始数据
+		var originalFilms = that.data.films
+		var originalHasMore = that.data.hasMore
+		var originalShowLoading = that.data.showLoading
+		var originalStart = that.data.start
+		
+		// 临时设置数据
+		that.data.films = tempData.films
+		that.data.hasMore = tempData.hasMore
+		that.data.showLoading = tempData.showLoading
+		that.data.start = tempData.start
+		
+		douban.fetchFilms.call(that, apiUrl, that.data[startKey], null, function(data) {
 			wx.hideNavigationBarLoading()
-			// 只有热映中Tab才显示轮播图
-			if (tab === 'popular' && data && data.subjects && data.subjects.length > 0) {
-				var bannerList = data.subjects.slice(0, 5).map(function(film) {
-					return {
-						type: 'film',
-						id: film.id,
-						imgUrl: film.images.backdrop || film.images.large || film.images.medium || ''
-					}
-				}).filter(function(banner) {
-					// 过滤掉没有图片的项
-					return banner.imgUrl !== ''
-				})
-				if (bannerList.length > 0) {
-					that.setData({
-						bannerList: bannerList
+			// 恢复原始的 setData 和数据
+			that.setData = originalSetData
+			that.data.films = originalFilms
+			that.data.hasMore = originalHasMore
+			that.data.showLoading = originalShowLoading
+			that.data.start = originalStart
+			
+			// 所有Tab都提取轮播图数据（如果当前没有轮播图数据，则从当前tab数据中提取）
+			if (data && data.subjects && data.subjects.length > 0) {
+				// 如果当前没有轮播图数据，或者切换到热映中tab，则更新轮播图
+				if (!that.data.bannerList || that.data.bannerList.length === 0 || tab === 'popular') {
+					var bannerList = data.subjects.slice(0, 5).map(function(film) {
+						return {
+							type: 'film',
+							id: film.id,
+							imgUrl: film.images.backdrop || film.images.large || film.images.medium || ''
+						}
+					}).filter(function(banner) {
+						// 过滤掉没有图片的项
+						return banner.imgUrl !== ''
 					})
+					if (bannerList.length > 0) {
+						that.setData({
+							bannerList: bannerList
+						})
+					}
 				}
 			}
 		})
 	},
 	onPullDownRefresh: function() {
 		var that = this
+		var tab = that.data.currentTab
+		var dataKey = tab + 'Films'
+		var hasMoreKey = tab + 'HasMore'
+		var loadingKey = tab + 'ShowLoading'
+		var startKey = tab + 'Start'
+		
 		that.setData({
-			films: [],
-			hasMore: true,
-			showLoading: true,
-			start: 0,
-			bannerList: []
+			[dataKey]: [],
+			[hasMoreKey]: true,
+			[loadingKey]: true,
+			[startKey]: 0
 		})
-		this.loadFilms(that.data.currentTab)
+		
+		// 如果是热映中tab，清空轮播图
+		if (tab === 'popular') {
+			that.setData({
+				bannerList: []
+			})
+		}
+		
+		this.loadFilms(tab)
 	},
 	onReachBottom: function() {
 		var that = this
-		if (!that.data.showLoading) {
+		var tab = that.data.currentTab
+		var loadingKey = tab + 'ShowLoading'
+		
+		if (!that.data[loadingKey]) {
 			var apiUrl
-			if (that.data.currentTab === 'popular') {
+			if (tab === 'popular') {
 				apiUrl = config.apiList.popular
-			} else if (that.data.currentTab === 'coming') {
+			} else if (tab === 'coming') {
 				apiUrl = config.apiList.coming
-			} else if (that.data.currentTab === 'top') {
+			} else if (tab === 'top') {
 				apiUrl = config.apiList.top
 			}
-			douban.fetchFilms.call(that, apiUrl, that.data.start)
+			
+			// 存储原始的 setData 方法
+			var originalSetData = that.setData
+			
+			// 包装 setData 方法
+			var wrappedSetData = function(obj) {
+				var mappedObj = {}
+				if (obj.films !== undefined) mappedObj[tab + 'Films'] = obj.films
+				if (obj.hasMore !== undefined) mappedObj[tab + 'HasMore'] = obj.hasMore
+				if (obj.showLoading !== undefined) mappedObj[tab + 'ShowLoading'] = obj.showLoading
+				if (obj.start !== undefined) mappedObj[tab + 'Start'] = obj.start
+				originalSetData.call(that, { ...obj, ...mappedObj })
+			}
+			
+			that.setData = wrappedSetData
+			var startKey = tab + 'Start'
+			
+			// 临时设置数据键，让fetchFilms能够正确读取
+			var tempData = {
+				films: that.data[tab + 'Films'] || [],
+				hasMore: that.data[tab + 'HasMore'] !== false,
+				showLoading: that.data[tab + 'ShowLoading'] || false,
+				start: that.data[startKey] || 0
+			}
+			
+			// 临时保存原始数据
+			var originalFilms = that.data.films
+			var originalHasMore = that.data.hasMore
+			var originalShowLoading = that.data.showLoading
+			var originalStart = that.data.start
+			
+			// 临时设置数据
+			that.data.films = tempData.films
+			that.data.hasMore = tempData.hasMore
+			that.data.showLoading = tempData.showLoading
+			that.data.start = tempData.start
+			
+			douban.fetchFilms.call(that, apiUrl, that.data[startKey])
+			
+			// 恢复原始数据
+			that.setData = originalSetData
+			that.data.films = originalFilms
+			that.data.hasMore = originalHasMore
+			that.data.showLoading = originalShowLoading
+			that.data.start = originalStart
 		}
 	},
 	viewFilmDetail: function(e) {
