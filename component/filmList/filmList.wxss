@@ -41,43 +41,115 @@
     justify-content: space-between;
 }
 
+.film-title-row {
+    margin-bottom: 16rpx;
+}
+
 .film-title {
     font-size: 36rpx;
     font-weight: bold;
     color: #333;
-    margin-bottom: 16rpx;
     line-height: 1.4;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    margin-bottom: 8rpx;
 }
 
+/* 精选短评 */
+.film-short-review {
+    font-size: 24rpx;
+    color: #666;
+    line-height: 1.6;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-style: italic;
+    margin-top: 4rpx;
+}
+
+.film-short-review .quote {
+    color: #999;
+    font-style: normal;
+}
+
+/* 类型标签 */
+.film-genres {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 12rpx;
+    gap: 8rpx;
+}
+
+.film-genre-tag {
+    display: inline-block;
+    padding: 4rpx 12rpx;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-size: 22rpx;
+    border-radius: 8rpx;
+    line-height: 1.4;
+}
+
+/* 评分展示优化 */
 .film-rating-section {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     margin-bottom: 16rpx;
 }
 
+.film-rating-main {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6rpx;
+}
+
 .film-rating-score {
-    font-size: 32rpx;
+    font-size: 44rpx;
     font-weight: bold;
     color: #ff6b35;
     margin-right: 12rpx;
+    line-height: 1;
+}
+
+.film-rating-count {
+    font-size: 22rpx;
+    color: #999;
+    line-height: 1;
+}
+
+/* 想看人数展示（待上映电影） */
+.film-wish-section {
+    display: flex;
+    align-items: center;
+}
+
+.film-wish-count {
+    font-size: 44rpx;
+    font-weight: bold;
+    color: #667eea;
+    line-height: 1;
+}
+
+.film-wish-placeholder {
+    font-size: 32rpx;
+    color: #999;
+    font-weight: normal;
 }
 
 .film-stars {
     display: flex;
     align-items: center;
-    gap: 4rpx;
+    gap: 2rpx;
 }
 
 .star-wrapper {
     position: relative;
-    width: 28rpx;
-    height: 28rpx;
-    margin-right: 4rpx;
+    width: 20rpx;
+    height: 20rpx;
+    margin-right: 2rpx;
 }
 
 .star-bg {
@@ -99,11 +171,11 @@
 }
 
 .star-icon {
-    font-size: 28rpx;
+    font-size: 20rpx;
     line-height: 1;
     display: block;
-    width: 28rpx;
-    height: 28rpx;
+    width: 20rpx;
+    height: 20rpx;
 }
 
 .star-icon.star-filled {
@@ -134,15 +206,60 @@
     color: #333;
 }
 
+/* 片长和地区 */
+.film-meta {
+    font-size: 24rpx;
+    color: #666;
+    margin-bottom: 12rpx;
+    line-height: 1.6;
+}
+
+.film-meta-item {
+    display: inline;
+}
+
+.film-meta-label {
+    color: #999;
+}
+
+.film-meta-value {
+    color: #666;
+}
+
+/* 想看人数和评分人数 */
+.film-stats {
+    font-size: 24rpx;
+    color: #666;
+    margin-bottom: 12rpx;
+    display: flex;
+    align-items: center;
+}
+
+.film-stat-item {
+    display: inline-flex;
+    align-items: baseline;
+}
+
+.film-stat-value {
+    color: #ff6b35;
+    font-weight: 500;
+    margin-right: 4rpx;
+}
+
+.film-stat-label {
+    color: #999;
+}
+
+/* 上映时间语义化 */
 .film-release {
     font-size: 26rpx;
-    color: #999;
+    color: #ff6b35;
     margin-bottom: 20rpx;
+    font-weight: 500;
 }
 
 .film-release-date {
-    color: #666;
-    font-weight: 500;
+    color: #ff6b35;
 }
 
 .film-actions {

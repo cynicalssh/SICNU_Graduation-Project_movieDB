@@ -1,3 +1,4 @@
+<wxs module="dateUtil" src="../../util/dateUtil.wxs"></wxs>
 <view class="container">
     <block wx:if="{{showLoading}}">
         <view class="loading">玩命加载中…</view>
@@ -48,13 +49,13 @@
             <view class="fd-bd-title">导演/演员</view>
             <view class="fd-bd-person">
                 <view class="fd-bd-person-item" data-id="{{filmDetail.directors[0].id}}" bindtap="viewPersonDetail">
-                    <image class="fd-bd-person-avatar" src="{{filmDetail.directors[0].avatars.medium}}"></image>
+                    <image class="fd-bd-person-avatar" src="{{filmDetail.directors[0].avatars.medium}}" mode="aspectFill"></image>
                     <view class="fd-bd-person-name">{{filmDetail.directors[0].name}}</view>
                     <view class="fd-bd-person-role">导演</view>
                 </view>
                 <block wx:for="{{filmDetail.casts}}" wx:for-item="filmDetailCastItem" wx:key="filmDetailCastItem">
                     <view class="fd-bd-person-item" data-id="{{filmDetailCastItem.id}}" bindtap="viewPersonDetail">
-                        <image class="fd-bd-person-avatar" src="{{filmDetailCastItem.avatars.medium}}"></image>
+                        <image class="fd-bd-person-avatar" src="{{filmDetailCastItem.avatars.medium}}" mode="aspectFill"></image>
                         <view class="fd-bd-person-name">{{filmDetailCastItem.name}}</view>
                         <view class="fd-bd-person-role">演员</view>
                     </view>
@@ -64,6 +65,100 @@
             <view class="fd-bd-tag">
                 <block wx:for="{{filmDetail.genres}}" wx:for-item="filmDetailTagItem" wx:key="filmDetailTagItem">
                     <view class="fd-bd-tag-item" data-tag="{{filmDetailTagItem}}" catchtap="viewFilmByTag">{{filmDetailTagItem}}</view>
+                </block>
+            </view>
+            
+            <!-- 评论区 -->
+            <view class="fd-bd-title">评论区</view>
+            <view class="fd-reviews">
+                <block wx:if="{{reviews.length > 0}}">
+                    <block wx:for="{{reviews}}" wx:for-item="reviewItem" wx:key="reviewItem.id">
+                        <view class="fd-review-item">
+                            <view class="fd-review-header">
+                                <image class="fd-review-avatar" src="{{reviewItem.avatar}}" mode="aspectFill" wx:if="{{reviewItem.avatar}}"></image>
+                                <view class="fd-review-avatar fd-review-avatar-placeholder" wx:else>{{reviewItem.author.substring(0, 1)}}</view>
+                                <view class="fd-review-info">
+                                    <view class="fd-review-author">{{reviewItem.author}}</view>
+                                    <view class="fd-review-date">{{dateUtil.formatReviewDate(reviewItem.created_at)}}</view>
+                                </view>
+                                <view class="fd-review-rating" wx:if="{{reviewItem.rating}}">
+                                    <text class="fd-review-rating-text">{{reviewItem.rating}}</text>
+                                    <text class="fd-review-rating-star">⭐</text>
+                                </view>
+                            </view>
+                            <view class="fd-review-content">{{reviewItem.content}}</view>
+                        </view>
+                    </block>
+                    <view class="fd-review-load-more" wx:if="{{reviewsHasMore}}" bindtap="loadMoreReviews">
+                        <text wx:if="{{reviewsLoading}}">加载中...</text>
+                        <text wx:else>加载更多评论</text>
+                    </view>
+                    <view class="fd-review-load-more" wx:else>
+                        <text>没有更多评论了</text>
+                    </view>
+                </block>
+                <block wx:else>
+                    <view class="fd-review-empty">
+                        <text>暂无评论</text>
+                    </view>
+                </block>
+            </view>
+            
+            <!-- 讨论区 -->
+            <view class="fd-bd-title">讨论区</view>
+            <view class="fd-discussions">
+                <block wx:if="{{discussions.length > 0}}">
+                    <block wx:for="{{discussions}}" wx:for-item="discussionItem" wx:key="discussionItem.id">
+                        <view class="fd-discussion-item">
+                            <view class="fd-discussion-header">
+                                <view class="fd-discussion-title">{{discussionItem.name}}</view>
+                                <view class="fd-discussion-meta">
+                                    <text class="fd-discussion-author">{{discussionItem.author}}</text>
+                                    <text class="fd-discussion-date">{{dateUtil.formatReviewDate(discussionItem.created_at)}}</text>
+                                </view>
+                            </view>
+                            <view class="fd-discussion-content" wx:if="{{discussionItem.description}}">{{discussionItem.description}}</view>
+                            <view class="fd-discussion-footer">
+                                <text class="fd-discussion-replies {{discussionItem.showReplies ? 'active' : ''}}" bindtap="toggleReplies" data-index="{{index}}">💬 {{discussionItem.replies_count || discussionItem.comment_count || 0}} 条回复</text>
+                                <text class="fd-discussion-score" wx:if="{{discussionItem.score}}">👍 {{discussionItem.score}}</text>
+                            </view>
+                            <!-- 回复列表 -->
+                            <view class="fd-discussion-replies-list" wx:if="{{discussionItem.showReplies}}">
+                                <view class="fd-reply-loading" wx:if="{{discussionItem.repliesLoading}}">
+                                    <text>加载回复中...</text>
+                                </view>
+                                <block wx:else>
+                                    <block wx:if="{{discussionItem.replies && discussionItem.replies.length > 0}}">
+                                        <view class="fd-reply-item" wx:for="{{discussionItem.replies}}" wx:for-item="replyItem" wx:key="replyItem.id">
+                                            <view class="fd-reply-header">
+                                                <text class="fd-reply-author">{{replyItem.author}}</text>
+                                                <text class="fd-reply-date">{{dateUtil.formatReviewDate(replyItem.created_at)}}</text>
+                                            </view>
+                                            <view class="fd-reply-content">{{replyItem.content}}</view>
+                                            <view class="fd-reply-footer" wx:if="{{replyItem.score}}">
+                                                <text class="fd-reply-score">👍 {{replyItem.score}}</text>
+                                            </view>
+                                        </view>
+                                    </block>
+                                    <view class="fd-reply-empty" wx:else>
+                                        <text>暂无回复</text>
+                                    </view>
+                                </block>
+                            </view>
+                        </view>
+                    </block>
+                    <view class="fd-discussion-load-more" wx:if="{{discussionsHasMore}}" bindtap="loadMoreDiscussions">
+                        <text wx:if="{{discussionsLoading}}">加载中...</text>
+                        <text wx:else>加载更多讨论</text>
+                    </view>
+                    <view class="fd-discussion-load-more" wx:else>
+                        <text>没有更多讨论了</text>
+                    </view>
+                </block>
+                <block wx:else>
+                    <view class="fd-discussion-empty">
+                        <text>暂无讨论</text>
+                    </view>
                 </block>
             </view>
         </view>

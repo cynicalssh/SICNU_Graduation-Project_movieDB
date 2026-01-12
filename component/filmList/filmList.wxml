@@ -14,6 +14,70 @@ module.exports = {
 }
 </wxs>
 
+<wxs module="dateUtil">
+// 格式化上映时间
+function formatReleaseDate(releaseDate) {
+  if (!releaseDate) {
+    return ''
+  }
+  
+  var today = getDate()
+  var todayStr = today.getFullYear() + '-' + 
+    padZero(today.getMonth() + 1) + '-' + 
+    padZero(today.getDate())
+  
+  if (releaseDate === todayStr) {
+    return '今日上映'
+  }
+  
+  var release = parseDate(releaseDate)
+  if (!release) {
+    return releaseDate + ' 上映'
+  }
+  
+  var diffTime = release.getTime() - today.getTime()
+  var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  
+  if (diffDays < 0) {
+    // 已上映
+    var daysAgo = Math.abs(diffDays)
+    if (daysAgo === 1) {
+      return '昨日上映'
+    } else if (daysAgo <= 7) {
+      return daysAgo + '天前上映'
+    } else {
+      return releaseDate + ' 上映'
+    }
+  } else if (diffDays === 0) {
+    return '今日上映'
+  } else if (diffDays === 1) {
+    return '明日上映'
+  } else if (diffDays <= 7) {
+    return '还有' + diffDays + '天上映'
+  } else {
+    return releaseDate + ' 上映'
+  }
+}
+
+function parseDate(dateStr) {
+  if (!dateStr) return null
+  var parts = dateStr.split('-')
+  if (parts.length !== 3) return null
+  var year = parseInt(parts[0])
+  var month = parseInt(parts[1]) - 1
+  var day = parseInt(parts[2])
+  return getDate(year, month, day)
+}
+
+function padZero(num) {
+  return num < 10 ? '0' + num : num
+}
+
+module.exports = {
+  formatReleaseDate: formatReleaseDate
+}
+</wxs>
+
 <template name="filmList">
 <block wx:if="{{showLoading}}">
     <view class="loading">
@@ -28,20 +92,78 @@ module.exports = {
                     <image src="{{filmItem.images.large || filmItem.images.medium || ''}}" class="film-poster-img" mode="aspectFill" binderror="onImageError"></image>
                 </view>
                 <view class="film-info">
-                    <view class="film-title">{{filmItem.title}}</view>
-                    <view class="film-rating-section">
-                        <view class="film-rating-score">{{filmItem.rating.average > 0 ? filmItem.rating.average : '暂无'}}</view>
-                        <view class="film-stars" wx:if="{{filmItem.rating.average > 0}}">
-                            <view class="star-wrapper" wx:for="{{[1,2,3,4,5]}}" wx:key="star" wx:for-item="starIndex">
-                                <view class="star-bg">
-                                    <text class="star-icon star-empty">☆</text>
-                                </view>
-                                <view class="star-fill" style="width: {{starUtil.getStarFill(starIndex, filmItem.rating.average)}}">
-                                    <text class="star-icon star-filled">★</text>
-                                </view>
-                            </view>
+                    <view class="film-title-row">
+                        <view class="film-title">{{filmItem.title}}</view>
+                        <!-- 精选短评 -->
+                        <view class="film-short-review" wx:if="{{filmItem.short_review}}">
+                            <text class="quote">"</text>{{filmItem.short_review}}<text class="quote">"</text>
                         </view>
                     </view>
+                    
+                    <!-- 类型标签 -->
+                    <view class="film-genres" wx:if="{{filmItem.genres && filmItem.genres.length > 0}}">
+                        <view class="film-genre-tag" wx:for="{{filmItem.genres}}" wx:for-item="genreItem" wx:key="genre" wx:for-index="genreIndex">
+                            {{genreItem}}
+                        </view>
+                    </view>
+                    
+                    <!-- 评分展示优化：大号数字 + 小号星级 + 评分人数 -->
+                    <view class="film-rating-section">
+                        <block wx:if="{{filmItem.rating.average > 0}}">
+                            <!-- 有评分时显示评分和星级 -->
+                            <view class="film-rating-main">
+                                <view class="film-rating-score">{{filmItem.rating.average}}</view>
+                                <view class="film-stars">
+                                    <view class="star-wrapper" wx:for="{{[1,2,3,4,5]}}" wx:key="star" wx:for-item="starIndex">
+                                        <view class="star-bg">
+                                            <text class="star-icon star-empty">☆</text>
+                                        </view>
+                                        <view class="star-fill" style="width: {{starUtil.getStarFill(starIndex, filmItem.rating.average)}}">
+                                            <text class="star-icon star-filled">★</text>
+                                        </view>
+                                    </view>
+                                </view>
+                            </view>
+                            <view class="film-rating-count" wx:if="{{filmItem.ratings_count > 0}}">
+                                {{filmItem.ratings_count}}人评分
+                            </view>
+                        </block>
+                        <block wx:else>
+                            <!-- 待上映时显示想看人数 -->
+                            <view class="film-wish-section" wx:if="{{filmItem.wish_count > 0}}">
+                                <view class="film-wish-count">{{filmItem.wish_count}}人想看</view>
+                            </view>
+                            <view class="film-wish-section" wx:else>
+                                <view class="film-wish-count film-wish-placeholder">暂无评分</view>
+                            </view>
+                        </block>
+                    </view>
+                    
+                    <!-- 片长和地区 -->
+                    <view class="film-meta" wx:if="{{filmItem.durations || filmItem.runtime || (filmItem.countries && filmItem.countries.length > 0)}}">
+                        <text class="film-meta-item" wx:if="{{filmItem.durations || filmItem.runtime}}">
+                            <text class="film-meta-label">片长：</text>
+                            <text class="film-meta-value">{{filmItem.durations || (filmItem.runtime ? filmItem.runtime + '分钟' : '')}}</text>
+                        </text>
+                        <text class="film-meta-item" wx:if="{{filmItem.countries && filmItem.countries.length > 0}}">
+                            <text class="film-meta-label" wx:if="{{filmItem.durations || filmItem.runtime}}"> | </text>
+                            <text class="film-meta-label">地区：</text>
+                            <text class="film-meta-value">
+                                <block wx:for="{{filmItem.countries}}" wx:for-item="countryItem" wx:for-index="countryIndex" wx:key="country">
+                                    {{countryItem}}<text wx:if="{{countryIndex < filmItem.countries.length - 1}}"> / </text>
+                                </block>
+                            </text>
+                        </text>
+                    </view>
+                    
+                    <!-- 额外统计信息（仅在有评分时显示想看人数） -->
+                    <view class="film-stats" wx:if="{{filmItem.rating.average > 0 && filmItem.wish_count > 0}}">
+                        <text class="film-stat-item">
+                            <text class="film-stat-value">{{filmItem.wish_count}}</text>
+                            <text class="film-stat-label">人想看</text>
+                        </text>
+                    </view>
+                    
                     <view class="film-cast" wx:if="{{filmItem.casts && filmItem.casts.length > 0}}">
                         <text class="film-cast-label">主演：</text>
                         <text class="film-cast-names">
@@ -50,10 +172,12 @@ module.exports = {
                             </block>
                         </text>
                     </view>
+                    
+                    <!-- 上映时间语义化 -->
                     <view class="film-release" wx:if="{{filmItem.release_date}}">
-                        <text class="film-release-date">{{filmItem.release_date}}</text>
-                        <text class="film-release-text"> 上映</text>
+                        <text class="film-release-date">{{dateUtil.formatReleaseDate(filmItem.release_date)}}</text>
                     </view>
+                    
                     <view class="film-actions">
                         <button class="film-buy-btn" data-id="{{filmItem.id}}" catchtap="viewFilmDetail">购票</button>
                     </view>

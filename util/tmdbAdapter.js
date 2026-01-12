@@ -32,6 +32,38 @@ function convertFilmItem(tmdbFilm) {
     })
   }
   
+  // 处理片长（TMDB返回的是分钟数）
+  var runtime = tmdbFilm.runtime || 0
+  var durations = runtime > 0 ? runtime + '分钟' : ''
+  
+  // 处理地区（TMDB返回的是production_countries数组）
+  var countries = []
+  if (tmdbFilm.production_countries && tmdbFilm.production_countries.length > 0) {
+    countries = tmdbFilm.production_countries.map(function(country) {
+      // TMDB返回的是ISO国家代码，需要转换为中文名称
+      // 这里先直接返回英文名称，如果需要可以添加映射表
+      return country.name || country.iso_3166_1 || ''
+    }).filter(function(name) {
+      return name !== ''
+    })
+  }
+  
+  // 生成精选短评（从overview中提取或生成，限制在12字以内）
+  var shortReview = ''
+  if (tmdbFilm.overview) {
+    // 从简介中提取前12个字符作为短评
+    var overview = tmdbFilm.overview.trim()
+    // 去掉标点符号和换行，取前12字
+    overview = overview.replace(/[，。！？；：、\n\r]/g, '')
+    if (overview.length > 12) {
+      shortReview = overview.substring(0, 12)
+    } else if (overview.length > 0) {
+      shortReview = overview
+    }
+  }
+  
+  // 如果没有overview或overview为空，不生成短评（显示为空）
+  
   return {
     id: tmdbFilm.id,
     title: tmdbFilm.title || tmdbFilm.name || '',
@@ -51,6 +83,10 @@ function convertFilmItem(tmdbFilm) {
     year: tmdbFilm.release_date ? tmdbFilm.release_date.split('-')[0] : (tmdbFilm.first_air_date ? tmdbFilm.first_air_date.split('-')[0] : ''),
     release_date: tmdbFilm.release_date || tmdbFilm.first_air_date || '',
     casts: casts,
+    runtime: runtime, // 片长（分钟数）
+    durations: durations, // 片长（格式化字符串）
+    countries: countries, // 地区数组
+    short_review: shortReview, // 精选短评（≤12字）
     collect_count: tmdbFilm.popularity ? Math.round(tmdbFilm.popularity) : 0,
     wish_count: 0, // TMDB没有这个字段
     ratings_count: tmdbFilm.vote_count || 0
@@ -132,9 +168,24 @@ function convertFilmDetail(tmdbFilm) {
     }]
   }
   
+  // 处理片长（TMDB返回的是分钟数）
+  var runtime = tmdbFilm.runtime || 0
+  var durations = runtime > 0 ? runtime + '分钟' : ''
+  
+  // 处理地区（TMDB返回的是production_countries数组）
+  var countries = []
+  if (tmdbFilm.production_countries && tmdbFilm.production_countries.length > 0) {
+    countries = tmdbFilm.production_countries.map(function(country) {
+      return country.name || country.iso_3166_1 || ''
+    }).filter(function(name) {
+      return name !== ''
+    })
+  }
+  
   return {
     id: tmdbFilm.id,
     title: tmdbFilm.title || tmdbFilm.name || '',
+    original_title: tmdbFilm.original_title || tmdbFilm.original_name || tmdbFilm.title || tmdbFilm.name || '', // 英文标题
     images: {
       large: tmdbFilm.poster_path ? (TMDB_IMAGE_BASE_LARGE + tmdbFilm.poster_path) : '',
       medium: tmdbFilm.poster_path ? (TMDB_IMAGE_BASE + tmdbFilm.poster_path) : '',
@@ -151,6 +202,9 @@ function convertFilmDetail(tmdbFilm) {
     summary: tmdbFilm.overview || '暂无简介',
     directors: directors,
     casts: casts,
+    runtime: runtime, // 片长（分钟数）
+    durations: durations, // 片长（格式化字符串）
+    countries: countries, // 地区数组
     collect_count: tmdbFilm.popularity ? Math.round(tmdbFilm.popularity) : 0,
     wish_count: 0,
     ratings_count: tmdbFilm.vote_count || 0
@@ -189,10 +243,93 @@ function convertFilmListResponse(tmdbResponse) {
   }
 }
 
+/**
+ * 转换评论数据（从TMDB格式转为内部格式）
+ */
+function convertReview(tmdbReview) {
+  return {
+    id: tmdbReview.id || '',
+    author: tmdbReview.author || '匿名用户',
+    content: tmdbReview.content || '',
+    created_at: tmdbReview.created_at || '',
+    rating: tmdbReview.author_details && tmdbReview.author_details.rating ? (tmdbReview.author_details.rating / 2).toFixed(1) : null, // TMDB评分是0-10，转换为0-5
+    avatar: tmdbReview.author_details && tmdbReview.author_details.avatar_path ? 
+      (tmdbReview.author_details.avatar_path.startsWith('http') ? 
+        tmdbReview.author_details.avatar_path : 
+        'https://image.tmdb.org/t/p/w500' + tmdbReview.author_details.avatar_path) : ''
+  }
+}
+
+/**
+ * 转换评论列表响应（从TMDB格式转为内部格式）
+ */
+function convertReviewListResponse(tmdbResponse) {
+  return {
+    reviews: (tmdbResponse.results || []).map(convertReview),
+    total: tmdbResponse.total_results || 0,
+    page: tmdbResponse.page || 1,
+    total_pages: tmdbResponse.total_pages || 1
+  }
+}
+
+/**
+ * 转换Reddit讨论响应（从Reddit格式转为内部格式）
+ */
+function convertRedditDiscussionResponse(redditResponse, filmTitle) {
+  var children = redditResponse.data && redditResponse.data.children || []
+  console.log('转换Reddit讨论，原始数据数量:', children.length)
+  
+  var discussions = children.map(function(child) {
+    var post = child.data || {}
+    // 过滤掉selftext为空且url指向外部的帖子（这些通常是链接分享，不是讨论）
+    if (!post.selftext && post.url && !post.url.includes('reddit.com')) {
+      return null
+    }
+    
+    // 确保permalink是完整的URL
+    var permalink = post.permalink
+    if (permalink && !permalink.startsWith('http')) {
+      permalink = 'https://www.reddit.com' + permalink
+    }
+    
+    return {
+      id: post.id || '',
+      name: post.title || '无标题',
+      description: post.selftext || post.title || '',
+      created_at: post.created ? new Date(post.created * 1000).toISOString() : new Date().toISOString(),
+      updated_at: post.edited ? new Date(post.edited * 1000).toISOString() : '',
+      author: post.author || '匿名用户',
+      replies_count: post.num_comments || 0,
+      comment_count: post.num_comments || 0,
+      score: post.score || 0,
+      url: post.url || '',
+      permalink: permalink || ''  // 确保包含完整的permalink用于获取回复
+    }
+  }).filter(function(item) {
+    return item !== null
+  })
+  
+  console.log('转换后的讨论数量:', discussions.length)
+  if (discussions.length > 0) {
+    console.log('第一条讨论permalink:', discussions[0].permalink)
+  }
+  
+  return {
+    discussions: discussions,
+    total: redditResponse.data ? redditResponse.data.dist : discussions.length,
+    page: 1,
+    total_pages: 1,
+    after: redditResponse.data ? redditResponse.data.after : null
+  }
+}
+
 module.exports = {
   convertFilmItem: convertFilmItem,
   convertFilmDetail: convertFilmDetail,
   convertPersonDetail: convertPersonDetail,
-  convertFilmListResponse: convertFilmListResponse
+  convertFilmListResponse: convertFilmListResponse,
+  convertReview: convertReview,
+  convertReviewListResponse: convertReviewListResponse,
+  convertRedditDiscussionResponse: convertRedditDiscussionResponse
 }
 

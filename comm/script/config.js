@@ -34,7 +34,12 @@ var tmdbApiList = {
     },
     filmDetail: tmdbApiUrl + '/movie/',
     personDetail: tmdbApiUrl + '/person/',
-    genreList: tmdbApiUrl + '/genre/movie/list'  // 获取类型列表
+    genreList: tmdbApiUrl + '/genre/movie/list',  // 获取类型列表
+    filmReviews: tmdbApiUrl + '/movie/',  // 电影评论API，使用时需要拼接电影ID和/reviews
+    filmDiscussions: tmdbApiUrl + '/movie/',  // 电影讨论API（TMDB不支持，保留用于兼容）
+    // Reddit API用于获取电影讨论（免费，无需API Key）
+    redditBaseUrl: 'https://www.reddit.com',
+    redditSearch: 'https://www.reddit.com/r/movies/search.json'  // Reddit电影讨论搜索
 }
 
 module.exports = {
@@ -56,6 +61,11 @@ module.exports = {
         filmDetail: tmdbApiList.filmDetail,
         personDetail: tmdbApiList.personDetail,
         genreList: tmdbApiList.genreList,
+        filmReviews: tmdbApiList.filmReviews,
+        filmDiscussions: tmdbApiList.filmDiscussions,
+        redditBaseUrl: tmdbApiList.redditBaseUrl,
+        redditSearch: tmdbApiList.redditSearch,
+        redditComments: tmdbApiList.redditBaseUrl + '/r/movies/comments/',  // Reddit评论API
         baiduMap: 'https://api.map.baidu.com/geocoder/v2/',
         tencentMap: 'https://apis.map.qq.com/ws/geocoder/v1/',  // 腾讯地图逆地理编码API
         amapGeocode: 'https://restapi.amap.com/v3/geocode/regeo'  // 高德地图逆地理编码API

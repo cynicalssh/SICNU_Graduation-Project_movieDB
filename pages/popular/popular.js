@@ -290,14 +290,22 @@ Page({
 			that.data.showLoading = tempData.showLoading
 			that.data.start = tempData.start
 			
-			douban.fetchFilms.call(that, apiUrl, that.data[startKey])
-			
-			// 恢复原始数据
-			that.setData = originalSetData
-			that.data.films = originalFilms
-			that.data.hasMore = originalHasMore
-			that.data.showLoading = originalShowLoading
-			that.data.start = originalStart
+			// 调用fetchFilms，传入所有必需的参数
+			douban.fetchFilms.call(that, apiUrl, that.data[startKey], null, function(data) {
+				// 恢复原始的 setData 和数据
+				that.setData = originalSetData
+				that.data.films = originalFilms
+				that.data.hasMore = originalHasMore
+				that.data.showLoading = originalShowLoading
+				that.data.start = originalStart
+			}, function() {
+				// 失败时也恢复原始数据
+				that.setData = originalSetData
+				that.data.films = originalFilms
+				that.data.hasMore = originalHasMore
+				that.data.showLoading = originalShowLoading
+				that.data.start = originalStart
+			})
 		}
 	},
 	viewFilmDetail: function(e) {
