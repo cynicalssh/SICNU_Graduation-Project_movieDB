@@ -192,6 +192,9 @@ Page({
 			that.data.showLoading = originalShowLoading
 			that.data.start = originalStart
 			
+			// 初始化电影的想看和看过状态
+			that.initFilmStatus(tab)
+			
 			// 所有Tab都提取轮播图数据（如果当前没有轮播图数据，则从当前tab数据中提取）
 			if (data && data.subjects && data.subjects.length > 0) {
 				// 如果当前没有轮播图数据，或者切换到热映中tab，则更新轮播图
@@ -298,6 +301,9 @@ Page({
 				that.data.hasMore = originalHasMore
 				that.data.showLoading = originalShowLoading
 				that.data.start = originalStart
+				
+				// 初始化电影的想看和看过状态
+				that.initFilmStatus(tab)
 			}, function() {
 				// 失败时也恢复原始数据
 				that.setData = originalSetData
@@ -379,5 +385,262 @@ Page({
 	onBannerImageError: function(e) {
 		// 轮播图加载失败时的处理
 		console.warn('轮播图加载失败:', e)
+	},
+	// 初始化电影的想看和看过状态
+	initFilmStatus: function(tab) {
+		var that = this
+		var dataKey = tab + 'Films'
+		var films = that.data[dataKey] || []
+		
+		// 获取本地存储的想看和看过列表
+		wx.getStorage({
+			key: 'film_wish',
+			success: function(wishRes) {
+				var wishList = wishRes.data || []
+				wx.getStorage({
+					key: 'film_watched',
+					success: function(watchedRes) {
+						var watchedList = watchedRes.data || []
+						
+						// 更新每个电影的状态
+						var updatedFilms = films.map(function(film) {
+							var isWish = wishList.some(function(wishFilm) {
+								return wishFilm.id == film.id
+							})
+							var isWatched = watchedList.some(function(watchedFilm) {
+								return watchedFilm.id == film.id
+							})
+							film.isWish = isWish
+							film.isWatched = isWatched
+							return film
+						})
+						
+						// 更新数据
+						var updateObj = {}
+						updateObj[dataKey] = updatedFilms
+						that.setData(updateObj)
+					},
+					fail: function() {
+						// 如果没有看过列表，只更新想看状态
+						var updatedFilms = films.map(function(film) {
+							var isWish = wishList.some(function(wishFilm) {
+								return wishFilm.id == film.id
+							})
+							film.isWish = isWish
+							film.isWatched = false
+							return film
+						})
+						var updateObj = {}
+						updateObj[dataKey] = updatedFilms
+						that.setData(updateObj)
+					}
+				})
+			},
+			fail: function() {
+				// 如果没有想看列表，只更新看过状态
+				wx.getStorage({
+					key: 'film_watched',
+					success: function(watchedRes) {
+						var watchedList = watchedRes.data || []
+						var updatedFilms = films.map(function(film) {
+							var isWatched = watchedList.some(function(watchedFilm) {
+								return watchedFilm.id == film.id
+							})
+							film.isWish = false
+							film.isWatched = isWatched
+							return film
+						})
+						var updateObj = {}
+						updateObj[dataKey] = updatedFilms
+						that.setData(updateObj)
+					},
+					fail: function() {
+						// 两个列表都没有，设置为false
+						var updatedFilms = films.map(function(film) {
+							film.isWish = false
+							film.isWatched = false
+							return film
+						})
+						var updateObj = {}
+						updateObj[dataKey] = updatedFilms
+						that.setData(updateObj)
+					}
+				})
+			}
+		})
+	},
+	// 切换想看状态
+	toggleWish: function(e) {
+		var that = this
+		var data = e.currentTarget.dataset
+		var filmId = data.id
+		var filmIndex = data.index
+		var tab = that.data.currentTab
+		var dataKey = tab + 'Films'
+		var films = that.data[dataKey] || []
+		var film = films[filmIndex]
+		
+		if (!film) {
+			return
+		}
+		
+		// 获取本地存储的想看列表
+		wx.getStorage({
+			key: 'film_wish',
+			success: function(res) {
+				var wishList = res.data || []
+				var isWish = wishList.some(function(wishFilm) {
+					return wishFilm.id == filmId
+				})
+				
+				if (isWish) {
+					// 移除
+					var newWishList = wishList.filter(function(wishFilm) {
+						return wishFilm.id != filmId
+					})
+					wx.setStorage({
+						key: 'film_wish',
+						data: newWishList,
+						success: function() {
+							// 更新页面状态
+							films[filmIndex].isWish = false
+							var updateObj = {}
+							updateObj[dataKey] = films
+							that.setData(updateObj)
+							wx.showToast({
+								title: '已取消想看',
+								icon: 'none',
+								duration: 1500
+							})
+						}
+					})
+				} else {
+					// 添加
+					wishList.push(film)
+					wx.setStorage({
+						key: 'film_wish',
+						data: wishList,
+						success: function() {
+							// 更新页面状态
+							films[filmIndex].isWish = true
+							var updateObj = {}
+							updateObj[dataKey] = films
+							that.setData(updateObj)
+							wx.showToast({
+								title: '已添加到想看',
+								icon: 'success',
+								duration: 1500
+							})
+						}
+					})
+				}
+			},
+			fail: function() {
+				// 如果没有存储，创建新列表
+				var wishList = [film]
+				wx.setStorage({
+					key: 'film_wish',
+					data: wishList,
+					success: function() {
+						films[filmIndex].isWish = true
+						var updateObj = {}
+						updateObj[dataKey] = films
+						that.setData(updateObj)
+						wx.showToast({
+							title: '已添加到想看',
+							icon: 'success',
+							duration: 1500
+						})
+					}
+				})
+			}
+		})
+	},
+	// 切换看过状态
+	toggleWatched: function(e) {
+		var that = this
+		var data = e.currentTarget.dataset
+		var filmId = data.id
+		var filmIndex = data.index
+		var tab = that.data.currentTab
+		var dataKey = tab + 'Films'
+		var films = that.data[dataKey] || []
+		var film = films[filmIndex]
+		
+		if (!film) {
+			return
+		}
+		
+		// 获取本地存储的看过列表
+		wx.getStorage({
+			key: 'film_watched',
+			success: function(res) {
+				var watchedList = res.data || []
+				var isWatched = watchedList.some(function(watchedFilm) {
+					return watchedFilm.id == filmId
+				})
+				
+				if (isWatched) {
+					// 移除
+					var newWatchedList = watchedList.filter(function(watchedFilm) {
+						return watchedFilm.id != filmId
+					})
+					wx.setStorage({
+						key: 'film_watched',
+						data: newWatchedList,
+						success: function() {
+							// 更新页面状态
+							films[filmIndex].isWatched = false
+							var updateObj = {}
+							updateObj[dataKey] = films
+							that.setData(updateObj)
+							wx.showToast({
+								title: '已取消看过',
+								icon: 'none',
+								duration: 1500
+							})
+						}
+					})
+				} else {
+					// 添加
+					watchedList.push(film)
+					wx.setStorage({
+						key: 'film_watched',
+						data: watchedList,
+						success: function() {
+							// 更新页面状态
+							films[filmIndex].isWatched = true
+							var updateObj = {}
+							updateObj[dataKey] = films
+							that.setData(updateObj)
+							wx.showToast({
+								title: '已添加到看过',
+								icon: 'success',
+								duration: 1500
+							})
+						}
+					})
+				}
+			},
+			fail: function() {
+				// 如果没有存储，创建新列表
+				var watchedList = [film]
+				wx.setStorage({
+					key: 'film_watched',
+					data: watchedList,
+					success: function() {
+						films[filmIndex].isWatched = true
+						var updateObj = {}
+						updateObj[dataKey] = films
+						that.setData(updateObj)
+						wx.showToast({
+							title: '已添加到看过',
+							icon: 'success',
+							duration: 1500
+						})
+					}
+				})
+			}
+		})
 	}
 })

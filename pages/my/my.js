@@ -5,6 +5,8 @@ Page({
     gridList: [
       {enName:'favorite', zhName:'收藏'},
       {enName:'history', zhName:'浏览记录'},
+      {enName:'wish', zhName:'想看'},
+      {enName:'watched', zhName:'看过'},
       {enName:'gallery', zhName:'相册'},
       {enName:'setting', zhName:'设置'}
     ],

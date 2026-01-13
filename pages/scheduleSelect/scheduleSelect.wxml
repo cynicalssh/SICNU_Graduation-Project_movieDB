@@ -1,0 +1,52 @@
+<view class="container">
+  <view class="header-info">
+    <view class="film-title">{{filmTitle}}</view>
+    <view class="cinema-name-row">
+      <view class="cinema-name">{{cinemaName}}</view>
+      <view class="location-btn" 
+            catchtap="showCinemaMap"
+            data-name="{{cinemaName}}"
+            data-id="{{cinemaId}}">
+        <text class="location-icon">📍</text>
+      </view>
+    </view>
+  </view>
+  
+  <view class="date-selector">
+    <view class="date-item {{selectedDate === item.date ? 'active' : ''}}" 
+          wx:for="{{dateList}}" 
+          wx:key="date" 
+          wx:for-item="item"
+          data-date="{{item.date}}" 
+          bindtap="selectDate">
+      <view class="date-label">{{item.label}}</view>
+      <view class="date-value">{{item.date.split('-')[1]}}/{{item.date.split('-')[2]}}</view>
+      <view class="date-weekday">周{{item.weekDay}}</view>
+    </view>
+  </view>
+  
+  <view class="schedule-list">
+    <view class="schedule-section" wx:for="{{scheduleGroup}}" wx:key="type" wx:for-item="group">
+      <view class="section-title">{{group.type}}</view>
+      <view class="schedule-items">
+        <view class="schedule-item" 
+              wx:for="{{group.schedules}}" 
+              wx:key="id" 
+              wx:for-item="schedule"
+              data-id="{{schedule.id}}" 
+              data-schedule="{{schedule}}" 
+              bindtap="selectSchedule">
+          <view class="schedule-time">{{schedule.time}}</view>
+          <view class="schedule-info">
+            <text class="schedule-hall">{{schedule.hall}}</text>
+            <text class="schedule-language">{{schedule.language}}</text>
+          </view>
+          <view class="schedule-price">¥{{schedule.price}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+
+

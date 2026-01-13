@@ -171,6 +171,18 @@ Page({
 			}
 		})
 	},
+	// 选座购票
+	buyTicket: function() {
+		var that = this
+		var filmId = that.data.filmDetail.id
+		var filmTitle = that.data.filmDetail.title
+		var filmRating = that.data.filmDetail.rating ? that.data.filmDetail.rating.average : 0
+		wx.navigateTo({
+			url: '../cinemaSelect/cinemaSelect?filmId=' + filmId + 
+			     '&filmTitle=' + encodeURIComponent(filmTitle) +
+			     '&filmRating=' + filmRating
+		})
+	},
 	// 加载评论
 	loadReviews: function(filmId) {
 		var that = this
@@ -224,8 +236,22 @@ Page({
 			var newDiscussions = data.discussions || []
 			console.log('当前讨论数:', currentDiscussions.length, '新讨论数:', newDiscussions.length)
 			
+			// 处理新讨论数据，判断是否需要展开功能
+			var processedDiscussions = newDiscussions.map(function(discussion) {
+				// 判断内容是否超过3行（大约150个字符）
+				var needsExpand = discussion.description && discussion.description.length > 150
+				// 复制讨论对象并添加展开相关属性
+				var processed = {}
+				for (var key in discussion) {
+					processed[key] = discussion[key]
+				}
+				processed.isExpanded = false
+				processed.needsExpand = needsExpand
+				return processed
+			})
+			
 			that.setData({
-				discussions: currentDiscussions.concat(newDiscussions),
+				discussions: currentDiscussions.concat(processedDiscussions),
 				discussionsPage: that.data.discussionsPage + 1,
 				discussionsHasMore: data && data.page < data.total_pages,
 				discussionsTotal: data ? data.total : 0,
@@ -243,6 +269,22 @@ Page({
 		if (filmId) {
 			that.loadDiscussions(filmId, filmInfo)
 		}
+	},
+	// 切换讨论内容展开/收起
+	toggleDiscussionExpand: function(e) {
+		var that = this
+		var index = e.currentTarget.dataset.index
+		var discussions = that.data.discussions || []
+		var discussion = discussions[index]
+		
+		if (!discussion) {
+			return
+		}
+		
+		var updateKey = 'discussions[' + index + '].isExpanded'
+		that.setData({
+			[updateKey]: !discussion.isExpanded
+		})
 	},
 	// 切换回复显示/隐藏
 	toggleReplies: function(e) {

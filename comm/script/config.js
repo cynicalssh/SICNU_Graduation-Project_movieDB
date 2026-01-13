@@ -68,7 +68,8 @@ module.exports = {
         redditComments: tmdbApiList.redditBaseUrl + '/r/movies/comments/',  // Reddit评论API
         baiduMap: 'https://api.map.baidu.com/geocoder/v2/',
         tencentMap: 'https://apis.map.qq.com/ws/geocoder/v1/',  // 腾讯地图逆地理编码API
-        amapGeocode: 'https://restapi.amap.com/v3/geocode/regeo'  // 高德地图逆地理编码API
+        amapGeocode: 'https://restapi.amap.com/v3/geocode/regeo',  // 高德地图逆地理编码API
+        amapPlaceAround: 'https://restapi.amap.com/v3/place/around'  // 高德地图周边搜索API
     },
     hotKeyword: ['功夫熊猫', '烈日灼心', '摆渡人', '长城', '我不是潘金莲', '这个杀手不太冷', '驴得水', '海贼王之黄金城', '西游伏妖片', '我在故宫修文物', '你的名字'],
     hotTag: ['动作', '喜剧', '爱情', '悬疑'],

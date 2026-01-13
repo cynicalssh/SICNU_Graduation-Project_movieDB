@@ -1,0 +1,55 @@
+<view class="container">
+  <view class="order-info">
+    <view class="info-section">
+      <view class="section-title">电影信息</view>
+      <view class="info-item">
+        <text class="info-label">电影：</text>
+        <text class="info-value">{{filmTitle}}</text>
+      </view>
+    </view>
+    
+    <view class="info-section">
+      <view class="section-title">影院信息</view>
+      <view class="info-item">
+        <text class="info-label">影院：</text>
+        <text class="info-value">{{cinemaName}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">场次：</text>
+        <text class="info-value">{{scheduleText}}</text>
+      </view>
+    </view>
+    
+    <view class="info-section">
+      <view class="section-title">座位信息</view>
+      <view class="info-item">
+        <text class="info-label">座位：</text>
+        <text class="info-value">{{seatsText}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">数量：</text>
+        <text class="info-value">{{seats.length}}张</text>
+      </view>
+    </view>
+    
+    <view class="info-section">
+      <view class="section-title">订单信息</view>
+      <view class="info-item">
+        <text class="info-label">订单号：</text>
+        <text class="info-value">{{orderId}}</text>
+      </view>
+      <view class="info-item price-item">
+        <text class="info-label">总价：</text>
+        <text class="info-value price">¥{{totalPrice}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <view class="footer">
+    <button class="confirm-btn" bindtap="confirmOrder">确认下单</button>
+  </view>
+</view>
+
+
+
+

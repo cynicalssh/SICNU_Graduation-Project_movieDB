@@ -1,0 +1,60 @@
+<view class="container">
+  <!-- 影院信息 -->
+  <view class="cinema-header">
+    <view class="cinema-icon-wrapper">
+      <text class="cinema-icon">🎬</text>
+    </view>
+    <view class="cinema-info">
+      <view class="cinema-name">{{cinemaName}}</view>
+      <view class="cinema-address-row">
+        <view class="cinema-address" wx:if="{{cinemaAddress}}">
+          <text class="address-icon">📍</text>
+          <text>{{cinemaAddress}}</text>
+        </view>
+        <view class="location-btn" catchtap="openLocation" wx:if="{{cinemaAddress}}">
+          <text class="location-icon">📍</text>
+        </view>
+      </view>
+      <view class="cinema-distance" wx:if="{{cinemaDistance}}">
+        <text class="distance-icon">🚶</text>
+        <text>距离您 {{cinemaDistance}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 正在上映 -->
+  <view class="films-section">
+    <view class="section-title">正在上映</view>
+    
+    <view class="loading-container" wx:if="{{loading}}">
+      <text class="loading-text">加载中...</text>
+    </view>
+    
+    <view class="empty-container" wx:if="{{!loading && showEmpty}}">
+      <text class="empty-text">暂无电影信息</text>
+    </view>
+    
+    <view class="films-list" wx:if="{{!loading && !showEmpty && films.length > 0}}">
+      <view class="film-item" wx:for="{{films}}" wx:key="id" wx:for-item="film">
+        <image class="film-poster" src="{{film.images.large || film.images.medium || '/resource/logo.png'}}" mode="aspectFill" bindtap="viewFilmDetail" data-id="{{film.id}}"></image>
+        <view class="film-info">
+          <view class="film-title" bindtap="viewFilmDetail" data-id="{{film.id}}">{{film.title}}</view>
+          <view class="film-meta">
+            <text class="film-rating" wx:if="{{film.rating && film.rating.average > 0}}">
+              评分：{{film.rating.average}}分
+            </text>
+            <text class="film-year" wx:if="{{film.year}}">{{film.year}}年</text>
+          </view>
+          <view class="film-genres" wx:if="{{film.genres && film.genres.length > 0}}">
+            <text class="genre-tag" wx:for="{{film.genres}}" wx:key="index" wx:for-item="genre">{{genre}}</text>
+          </view>
+          <view class="film-actions">
+            <button class="buy-btn" data-id="{{film.id}}" data-title="{{film.title}}" data-index="{{index}}" bindtap="buyTicket">选座购票</button>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+

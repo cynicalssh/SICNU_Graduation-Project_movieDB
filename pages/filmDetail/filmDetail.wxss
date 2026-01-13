@@ -68,6 +68,23 @@
     content: '已'
 }
 
+.fd-buy-ticket {
+    box-sizing: border-box;
+    position: absolute;
+    z-index: 99;
+    bottom: 30rpx;
+    right: 120rpx;
+    width: 200rpx;
+    padding: 10rpx 30rpx;
+    font-size: 32rpx;
+    line-height: 1;
+    border-radius: 30rpx;
+    background-color: #ff6b35;
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+}
+
 .fd-cover {
     z-index: 9999;
     width: 300rpx;
@@ -389,12 +406,37 @@
     line-height: 1.8;
     color: #666;
     text-align: justify;
-    margin-bottom: 20rpx;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: all 0.3s ease;
+}
+
+.fd-discussion-content.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+}
+
+.fd-discussion-expand-btn {
+    margin-top: 12rpx;
+    text-align: right;
+}
+
+.fd-discussion-expand-btn text {
+    font-size: 26rpx;
+    color: #8b5cf6;
+    cursor: pointer;
+    padding: 8rpx 16rpx;
+    border-radius: 4rpx;
+    transition: all 0.3s ease;
+}
+
+.fd-discussion-expand-btn:active text {
+    color: #7c3aed;
+    background-color: #f3f4f6;
 }
 
 .fd-discussion-footer {

@@ -1,0 +1,39 @@
+<import src="../../component/nullTip/nullTip.wxml"/>
+<view class="tab-content">
+    <view class="tab-content-item">
+        <block wx:if="{{film_watched.length == 0}}">
+            <template is="nullTip" data="{{nullTip: nullTip}}"/>
+        </block>
+        <block wx:else>
+            <block wx:for="{{film_watched}}" wx:for-item="filmWatchedItem" wx:for-index="filmWatchedIndex" wx:key="filmWatched">
+                <view class="favorite-film-item" data-id="{{filmWatchedItem.id}}" bindtap="viewFilmDetail">
+                    <image class="favorite-film-cover" src="{{filmWatchedItem.images.large}}"></image>
+                    <view class="favorite-film-info">
+                        <view class="favorite-film-txt favorite-film-title">{{filmWatchedItem.title}}</view>
+                        <view class="favorite-film-txt">导演：{{filmWatchedItem.directors[0].name}}</view>
+                        <view class="favorite-film-txt">演员：
+                            <block wx:for="{{filmWatchedItem.casts}}" wx:for-item="filmDetailCastItem" wx:for-index="filmDetailCastIndex" wx:key="filmDetailCastItem">
+                                {{filmDetailCastItem.name}}
+                                <block wx:if="{{filmDetailCastIndex !== filmWatchedItem.casts.length - 1}}">/</block>
+                            </block>
+                        </view>
+                        <view class="favorite-film-txt">豆瓣评分：
+                            <block wx:if="{{filmWatchedItem.rating.average == 0}}">
+                                暂无评分
+                            </block>
+                            <block wx:else>
+                                {{filmWatchedItem.rating.average}}分
+                            </block>
+                        </view>
+                        <view class="favorite-film-txt">上映年份：{{filmWatchedItem.year}}年</view>
+                    </view>
+                </view>
+            </block>
+        </block>
+    </view>
+</view>
+
+
+
+
+

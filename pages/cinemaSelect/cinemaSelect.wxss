@@ -1,0 +1,315 @@
+.container {
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+/* 电影标题 */
+.film-header {
+  padding: 30rpx 30rpx 20rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.film-title {
+  font-size: 42rpx;
+  font-weight: bold;
+  color: #ffffff;
+  line-height: 1.4;
+}
+
+/* 筛选栏 */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 20rpx 0;
+  border-bottom: 1px solid #e8ecf0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.filter-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 0;
+  position: relative;
+}
+
+.filter-label {
+  font-size: 26rpx;
+  color: #333333;
+  max-width: 120rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter-arrow {
+  font-size: 20rpx;
+  color: #999999;
+  margin-left: 6rpx;
+}
+
+.filter-divider {
+  width: 1rpx;
+  height: 30rpx;
+  background-color: #e8ecf0;
+}
+
+/* 筛选下拉菜单 */
+.filter-dropdown {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e8ecf0;
+  padding: 20rpx 30rpx;
+  position: sticky;
+  top: 120rpx;
+  z-index: 99;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  font-size: 28rpx;
+  color: #666666;
+  border-bottom: 1px solid #f5f7fa;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item.active {
+  color: #667eea;
+  font-weight: 500;
+}
+
+.check-icon {
+  font-size: 32rpx;
+  color: #667eea;
+  font-weight: bold;
+}
+
+/* 影院列表 */
+.cinema-list {
+  height: calc(100vh - 280rpx);
+  padding: 20rpx 0;
+}
+
+/* 加载中 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #e8ecf0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  color: #999999;
+}
+
+/* 空状态 */
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 150rpx 0;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #666666;
+  margin-bottom: 10rpx;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+/* 影院卡片 */
+.cinema-item {
+  background-color: #ffffff;
+  margin: 0 20rpx 20rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.cinema-item:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.cinema-content {
+  display: flex;
+  padding: 30rpx;
+  align-items: flex-start;
+}
+
+.cinema-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cinema-name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.cinema-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333333;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cinema-brand-tag {
+  display: inline-block;
+  padding: 6rpx 16rpx;
+  margin-left: 12rpx;
+  font-size: 22rpx;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  border-radius: 20rpx;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.cinema-address-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.cinema-address {
+  font-size: 26rpx;
+  color: #666666;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cinema-distance {
+  font-size: 24rpx;
+  color: #999999;
+  margin-left: 16rpx;
+  white-space: nowrap;
+}
+
+.cinema-rating-row {
+  display: flex;
+  align-items: center;
+}
+
+.cinema-rating {
+  font-size: 26rpx;
+  color: #ff6b35;
+  font-weight: 500;
+}
+
+/* 操作按钮行 */
+.cinema-actions-row {
+  display: flex;
+  align-items: center;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1px solid #f0f0f0;
+}
+
+.location-btn {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  background-color: #f5f7fa;
+  border-radius: 20rpx;
+  transition: all 0.3s ease;
+}
+
+.location-btn:active {
+  background-color: #e8ecf0;
+  transform: scale(0.95);
+}
+
+.location-icon {
+  font-size: 28rpx;
+  margin-right: 6rpx;
+}
+
+.location-text {
+  font-size: 24rpx;
+  color: #666666;
+}
+
+/* 价格区域 */
+.cinema-price-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 20rpx;
+  padding-left: 20rpx;
+  border-left: 2rpx solid #f0f0f0;
+  min-width: 120rpx;
+}
+
+.cinema-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.price-symbol {
+  font-size: 24rpx;
+  color: #ff6b6b;
+  margin-right: 2rpx;
+  font-weight: 600;
+}
+
+.price-value {
+  font-size: 44rpx;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.price-unit {
+  font-size: 22rpx;
+  color: #999999;
+  margin-top: 4rpx;
+}

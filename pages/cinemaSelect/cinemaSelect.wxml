@@ -1,0 +1,131 @@
+<view class="container">
+  <!-- 电影标题 -->
+  <view class="film-header">
+    <text class="film-title">{{filmTitle}}</text>
+  </view>
+
+  <!-- 顶部筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-item city-item" bindtap="selectCity">
+      <text class="filter-label">{{currentCity || '定位中'}}</text>
+      <text class="filter-arrow">▼</text>
+    </view>
+    <view class="filter-divider"></view>
+    <view class="filter-item district-item" bindtap="selectDistrict">
+      <text class="filter-label">{{currentDistrict || '全城'}}</text>
+      <text class="filter-arrow">▼</text>
+    </view>
+    <view class="filter-divider"></view>
+    <view class="filter-item brand-item" bindtap="showBrandFilter">
+      <text class="filter-label">{{selectedBrand === '全部' ? '品牌' : selectedBrand}}</text>
+      <text class="filter-arrow">▼</text>
+    </view>
+    <view class="filter-divider"></view>
+    <view class="filter-item price-item" bindtap="showPriceFilter">
+      <text class="filter-label">{{selectedPriceRange === '全部' ? '价格' : selectedPriceRange}}</text>
+      <text class="filter-arrow">▼</text>
+    </view>
+    <view class="filter-divider"></view>
+    <view class="filter-item sort-item" bindtap="showSortOptions">
+      <text class="filter-label">排序</text>
+      <text class="filter-arrow">▼</text>
+    </view>
+  </view>
+
+  <!-- 品牌筛选下拉 -->
+  <view class="filter-dropdown" wx:if="{{showBrandFilter}}">
+    <view class="dropdown-item {{selectedBrand === item ? 'active' : ''}}" 
+          wx:for="{{brandOptions}}" 
+          wx:key="index"
+          data-brand="{{item}}"
+          bindtap="selectBrand">
+      {{item}}
+      <text class="check-icon" wx:if="{{selectedBrand === item}}">✓</text>
+    </view>
+  </view>
+
+  <!-- 价格筛选下拉 -->
+  <view class="filter-dropdown" wx:if="{{showPriceFilter}}">
+    <view class="dropdown-item {{selectedPriceRange === item ? 'active' : ''}}" 
+          wx:for="{{priceRangeOptions}}" 
+          wx:key="index"
+          data-range="{{item}}"
+          bindtap="selectPriceRange">
+      {{item}}
+      <text class="check-icon" wx:if="{{selectedPriceRange === item}}">✓</text>
+    </view>
+  </view>
+
+  <!-- 排序选项下拉 -->
+  <view class="filter-dropdown" wx:if="{{showSortOptions}}">
+    <view class="dropdown-item {{sortType === item.value ? 'active' : ''}}" 
+          wx:for="{{sortOptions}}" 
+          wx:key="value"
+          data-sort="{{item.value}}"
+          bindtap="selectSort">
+      {{item.label}}
+      <text class="check-icon" wx:if="{{sortType === item.value}}">✓</text>
+    </view>
+  </view>
+
+  <!-- 影院列表 -->
+  <scroll-view class="cinema-list" scroll-y="true">
+    <!-- 加载中 -->
+    <view class="loading-container" wx:if="{{loading}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-container" wx:if="{{!loading && showEmpty}}">
+      <view class="empty-icon">🎬</view>
+      <text class="empty-text">暂无符合条件的影院</text>
+      <text class="empty-hint">试试调整筛选条件</text>
+    </view>
+
+    <!-- 影院卡片列表 -->
+    <view class="cinema-item" 
+          wx:for="{{filteredCinemaList}}" 
+          wx:key="id" 
+          data-id="{{item.id}}" 
+          data-index="{{index}}" 
+          bindtap="selectCinema">
+      <view class="cinema-content">
+        <view class="cinema-info">
+          <view class="cinema-name-row">
+            <text class="cinema-name">{{item.name}}</text>
+            <view class="cinema-brand-tag" wx:if="{{item.brand && item.brand !== 'default'}}">
+              {{item.brand}}
+            </view>
+          </view>
+          <view class="cinema-address-row">
+            <text class="cinema-address">{{item.address}}</text>
+            <text class="cinema-distance" wx:if="{{item.distance}}">{{item.distance}}</text>
+          </view>
+          <view class="cinema-actions-row">
+            <view class="location-btn" 
+                  catchtap="showCinemaMap" 
+                  data-id="{{item.id}}"
+                  data-name="{{item.name}}"
+                  data-address="{{item.address}}"
+                  data-latitude="{{item.latitude}}"
+                  data-longitude="{{item.longitude}}">
+              <text class="location-icon">📍</text>
+              <text class="location-text">位置</text>
+            </view>
+          </view>
+          <view class="cinema-rating-row">
+            <text class="cinema-rating">评分 {{item.rating}}</text>
+          </view>
+        </view>
+        <view class="cinema-price-wrapper" wx:if="{{item.minPrice}}">
+          <view class="cinema-price">
+            <text class="price-symbol">¥</text>
+            <text class="price-value">{{item.minPrice}}</text>
+            <text class="price-unit">起</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

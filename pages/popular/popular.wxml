@@ -42,14 +42,14 @@
     <swiper-item>
         <scroll-view class="swiper-content" scroll-y="true" enable-back-to-top="true" show-scrollbar="false" enable-flex="true">
             <import src="../../component/filmList/filmList.wxml"/>
-            <template is="filmList" data="{{films: comingFilms, hasMore: comingHasMore, showLoading: comingShowLoading}}"/>
+            <template is="filmList" data="{{films: comingFilms, hasMore: comingHasMore, showLoading: comingShowLoading, pageType: 'coming'}}"/>
         </scroll-view>
     </swiper-item>
     <!-- 口碑 -->
     <swiper-item>
         <scroll-view class="swiper-content" scroll-y="true" enable-back-to-top="true" show-scrollbar="false" enable-flex="true">
             <import src="../../component/filmList/filmList.wxml"/>
-            <template is="filmList" data="{{films: topFilms, hasMore: topHasMore, showLoading: topShowLoading}}"/>
+            <template is="filmList" data="{{films: topFilms, hasMore: topHasMore, showLoading: topShowLoading, pageType: 'top'}}"/>
         </scroll-view>
     </swiper-item>
 </swiper>

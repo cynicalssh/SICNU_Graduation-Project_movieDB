@@ -265,6 +265,8 @@
 .film-actions {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 20rpx;
     margin-top: auto;
 }
 
@@ -284,6 +286,53 @@
 
 .film-buy-btn::after {
     border: none;
+}
+
+.film-action-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: 50%;
+    background-color: #f5f5f5;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.film-action-icon .icon {
+    font-size: 36rpx;
+    line-height: 1;
+    margin-bottom: 4rpx;
+    color: #999;
+    transition: all 0.3s ease;
+}
+
+.film-action-icon .label {
+    font-size: 20rpx;
+    color: #999;
+    transition: all 0.3s ease;
+}
+
+.film-action-icon.active {
+    background-color: #fff5f5;
+    box-shadow: 0 2rpx 8rpx rgba(255, 107, 53, 0.2);
+}
+
+.film-action-icon.active .icon {
+    color: #ff6b35;
+    transform: scale(1.1);
+}
+
+.film-action-icon.active .label {
+    color: #ff6b35;
+    font-weight: 500;
+}
+
+.film-action-icon:active {
+    transform: scale(0.95);
+    background-color: #ffe8e0;
 }
 
 .loading-tip {

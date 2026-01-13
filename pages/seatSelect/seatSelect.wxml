@@ -1,0 +1,57 @@
+<view class="container">
+  <view class="screen-info">
+    <view class="screen-label">荧幕</view>
+    <view class="screen-line"></view>
+  </view>
+  
+  <view class="seat-map">
+    <view class="seat-row" wx:for="{{seatMap}}" wx:key="rowLabel" wx:for-item="row" wx:for-index="rowIndex">
+      <view class="row-label">{{row.rowLabel}}</view>
+      <view class="seats">
+        <view class="seat {{item.status}}" 
+              wx:for="{{row.seats}}" 
+              wx:key="id" 
+              wx:for-item="item" 
+              wx:for-index="colIndex"
+              data-id="{{item.id}}" 
+              data-row="{{rowIndex}}" 
+              data-col="{{colIndex}}" 
+              bindtap="selectSeat">
+          <text wx:if="{{item.status === 'available'}}">{{item.col}}</text>
+          <text wx:if="{{item.status === 'sold'}}">已售</text>
+          <text wx:if="{{item.status === 'selected'}}">✓</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <view class="seat-legend">
+    <view class="legend-item">
+      <view class="legend-seat available"></view>
+      <text>可选</text>
+    </view>
+    <view class="legend-item">
+      <view class="legend-seat sold"></view>
+      <text>已售</text>
+    </view>
+    <view class="legend-item">
+      <view class="legend-seat selected"></view>
+      <text>已选</text>
+    </view>
+  </view>
+  
+  <view class="footer">
+    <view class="selected-info">
+      <text class="selected-text" wx:if="{{selectedSeats.length > 0}}">
+        已选{{selectedSeats.length}}个座位：{{selectedSeatsText}}
+      </text>
+      <text class="selected-text" wx:else>请选择座位</text>
+      <text class="total-price">¥{{totalPrice}}</text>
+    </view>
+    <button class="confirm-btn" bindtap="confirmSeats" disabled="{{selectedSeats.length === 0}}">确认选座</button>
+  </view>
+</view>
+
+
+
+

@@ -10,6 +10,8 @@
     "pages/my/my",
     "pages/favorite/favorite",
     "pages/history/history",
+    "pages/wish/wish",
+    "pages/watched/watched",
     "pages/gallery/gallery",
     "pages/setting/setting",
     "pages/skin/skin",
@@ -20,7 +22,12 @@
     "pages/location/location",
     "pages/citySelect/citySelect",
     "pages/cinema/cinema",
-    "pages/districtSelect/districtSelect"
+    "pages/districtSelect/districtSelect",
+    "pages/cinemaSelect/cinemaSelect",
+    "pages/scheduleSelect/scheduleSelect",
+    "pages/seatSelect/seatSelect",
+    "pages/orderConfirm/orderConfirm",
+    "pages/cinemaDetail/cinemaDetail"
   ],
   "window": {
     "navigationBarBackgroundColor": "#47a86c",

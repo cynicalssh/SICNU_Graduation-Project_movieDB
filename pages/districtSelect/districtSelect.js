@@ -451,10 +451,41 @@ Page({
 
   // 选择区域
   selectDistrict: function(e) {
+    var that = this
     var district = e.currentTarget.dataset.district
     if (!district) {
       return
     }
+    
+    var city = that.data.currentCity
+    
+    // 保存到全局数据和缓存
+    var locationInfo = {
+      city: city,
+      district: district,
+      updateTime: Date.now()
+    }
+    
+    // 如果有经纬度信息，保留它
+    if (app.globalData.userLocation) {
+      if (app.globalData.userLocation.latitude) {
+        locationInfo.latitude = app.globalData.userLocation.latitude
+      }
+      if (app.globalData.userLocation.longitude) {
+        locationInfo.longitude = app.globalData.userLocation.longitude
+      }
+    }
+    
+    app.globalData.userLocation = locationInfo
+    
+    // 保存到缓存
+    wx.setStorage({
+      key: 'userLocation',
+      data: locationInfo,
+      success: function() {
+        console.log('区域选择已保存到缓存:', district)
+      }
+    })
     
     var pages = getCurrentPages()
     var prevPage = pages[pages.length - 2]  // 获取上一个页面
@@ -462,8 +493,13 @@ Page({
     // 更新上一个页面的区域选择
     if (prevPage && prevPage.setData) {
       prevPage.setData({
-        currentDistrict: district
+        currentDistrict: district,
+        currentCity: city  // 确保城市也同步
       })
+      // 如果上一个页面有 applyFilters 方法，调用它来重新筛选
+      if (prevPage.applyFilters) {
+        prevPage.applyFilters()
+      }
       // 如果上一个页面有 loadCinemaList 方法，调用它
       if (prevPage.loadCinemaList) {
         prevPage.loadCinemaList()

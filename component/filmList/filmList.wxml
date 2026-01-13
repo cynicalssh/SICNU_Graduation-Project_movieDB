@@ -179,7 +179,28 @@ module.exports = {
                     </view>
                     
                     <view class="film-actions">
-                        <button class="film-buy-btn" data-id="{{filmItem.id}}" catchtap="viewFilmDetail">购票</button>
+                        <!-- 待上映页面：显示"想看"图标 -->
+                        <block wx:if="{{pageType === 'coming'}}">
+                            <view class="film-action-icon {{filmItem.isWish ? 'active' : ''}}" data-id="{{filmItem.id}}" data-index="{{filmIndex}}" catchtap="toggleWish">
+                                <text class="icon">❤️</text>
+                                <text class="label">想看</text>
+                            </view>
+                        </block>
+                        <!-- 口碑页面：显示"想看"和"看过"图标 -->
+                        <block wx:elif="{{pageType === 'top'}}">
+                            <view class="film-action-icon {{filmItem.isWish ? 'active' : ''}}" data-id="{{filmItem.id}}" data-index="{{filmIndex}}" catchtap="toggleWish">
+                                <text class="icon">❤️</text>
+                                <text class="label">想看</text>
+                            </view>
+                            <view class="film-action-icon {{filmItem.isWatched ? 'active' : ''}}" data-id="{{filmItem.id}}" data-index="{{filmIndex}}" catchtap="toggleWatched">
+                                <text class="icon">✓</text>
+                                <text class="label">看过</text>
+                            </view>
+                        </block>
+                        <!-- 其他页面（热映中）：显示购票按钮 -->
+                        <block wx:else>
+                            <button class="film-buy-btn" data-id="{{filmItem.id}}" catchtap="viewFilmDetail">购票</button>
+                        </block>
                     </view>
                 </view>
             </view>

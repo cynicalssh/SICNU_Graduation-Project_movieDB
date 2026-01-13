@@ -1,5 +1,6 @@
 var app = getApp()
 var config = require('../../comm/script/config')
+var priceUtil = require('../../util/priceUtil')
 
 Page({
   data: {
@@ -667,6 +668,24 @@ Page({
         tel = tel.split(';')[0]  // 取第一个电话
       }
       
+      // 根据影院名称推断品牌（模拟）
+      var brand = 'default'
+      var cinemaName = poi.name || ''
+      if (cinemaName.indexOf('IMAX') !== -1 || cinemaName.indexOf('imax') !== -1) {
+        brand = 'IMAX'
+      } else if (cinemaName.indexOf('4DX') !== -1 || cinemaName.indexOf('4dx') !== -1) {
+        brand = '4DX'
+      } else if (cinemaName.indexOf('杜比') !== -1) {
+        brand = '杜比'
+      } else if (cinemaName.indexOf('巨幕') !== -1) {
+        brand = '巨幕'
+      } else if (cinemaName.indexOf('VIP') !== -1 || cinemaName.indexOf('vip') !== -1) {
+        brand = 'VIP'
+      }
+      
+      // 计算最低票价
+      var minPrice = priceUtil.getCinemaMinPrice(poi.id, poi.name, brand)
+      
       return {
         id: poi.id,
         name: poi.name,
@@ -680,7 +699,9 @@ Page({
         businessArea: poi.business_area || '',
         pname: poi.pname || '',  // 省份
         cityname: poi.cityname || '',  // 城市
-        adname: poi.adname || ''  // 区县
+        adname: poi.adname || '',  // 区县
+        brand: brand,
+        minPrice: minPrice
       }
     })
   },
@@ -696,10 +717,34 @@ Page({
 
   // 查看影院详情
   viewCinemaDetail: function(e) {
+    var that = this
     var cinemaId = e.currentTarget.dataset.id
-    wx.navigateTo({
-      url: '/pages/cinemaDetail/cinemaDetail?id=' + cinemaId
+    // 找到对应的影院信息
+    var cinema = that.data.cinemaList.find(function(item) {
+      return item.id == cinemaId
     })
+    
+    if (cinema) {
+      var url = '/pages/cinemaDetail/cinemaDetail?id=' + cinemaId + 
+                '&name=' + encodeURIComponent(cinema.name) + 
+                '&address=' + encodeURIComponent(cinema.address || '') +
+                '&distance=' + encodeURIComponent(cinema.distance || '') +
+                '&brand=' + encodeURIComponent(cinema.brand || '')
+      
+      // 如果有坐标信息，传递过去
+      if (cinema.latitude && cinema.longitude) {
+        url += '&latitude=' + cinema.latitude + 
+               '&longitude=' + cinema.longitude
+      }
+      
+      wx.navigateTo({
+        url: url
+      })
+    } else {
+      wx.navigateTo({
+        url: '/pages/cinemaDetail/cinemaDetail?id=' + cinemaId
+      })
+    }
   }
 })
 

@@ -28,6 +28,7 @@
                 <view class="fd-intro-txt">上映年份：{{filmDetail.year}}年</view>
             </scroll-view>
             <view class="fd-favorite {{isFilmFavorite ? 'fd-favorite-active' : ''}}" bindtap="favoriteFilm">收藏</view>
+            <view class="fd-buy-ticket" bindtap="buyTicket">选座购票</view>
         </view>
         <view class="fd-data">
             <view class="fd-data-item">
@@ -68,8 +69,8 @@
                 </block>
             </view>
             
-            <!-- 评论区 -->
-            <view class="fd-bd-title">评论区</view>
+            <!-- 评分 -->
+            <view class="fd-bd-title">评分</view>
             <view class="fd-reviews">
                 <block wx:if="{{reviews.length > 0}}">
                     <block wx:for="{{reviews}}" wx:for-item="reviewItem" wx:key="reviewItem.id">
