@@ -1,0 +1,176 @@
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100rpx;
+  background: #ffffff;
+  display: flex;
+  border-top: 1rpx solid #f0f0f0;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -2rpx 20rpx rgba(0, 0, 0, 0.06);
+  z-index: 999;
+  backdrop-filter: blur(10rpx);
+}
+
+.tab-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.tab-icon-wrapper {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4rpx;
+}
+
+.tab-icon {
+  width: 44rpx;
+  height: 44rpx;
+  transition: all 0.3s ease;
+}
+
+.tab-text {
+  font-size: 22rpx;
+  color: #999999;
+  transition: color 0.3s ease;
+}
+
+.tab-bar-item.active .tab-text {
+  color: #47a86c;
+  font-weight: 600;
+}
+
+/* 电影图标 - 胶片相机（更精致的设计） */
+.tab-icon-movie {
+  position: relative;
+}
+
+.tab-icon-movie::before {
+  content: '';
+  position: absolute;
+  top: 2rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36rpx;
+  height: 28rpx;
+  border: 3rpx solid #999;
+  border-radius: 6rpx;
+  background: transparent;
+  box-shadow: inset 0 0 0 2rpx transparent;
+}
+
+.tab-icon-movie::after {
+  content: '';
+  position: absolute;
+  top: 8rpx;
+  right: 4rpx;
+  width: 10rpx;
+  height: 10rpx;
+  border: 2rpx solid #999;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.tab-icon-movie.active::before {
+  border-color: #47a86c;
+  box-shadow: inset 0 0 0 2rpx #47a86c;
+}
+
+.tab-icon-movie.active::after {
+  border-color: #47a86c;
+  background: #47a86c;
+}
+
+/* 影院图标 - 电影屏幕（更精致的设计） */
+.tab-icon-cinema {
+  position: relative;
+}
+
+.tab-icon-cinema::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32rpx;
+  height: 20rpx;
+  border: 3rpx solid #999;
+  border-radius: 4rpx 4rpx 0 0;
+  background: transparent;
+}
+
+.tab-icon-cinema::after {
+  content: '';
+  position: absolute;
+  bottom: 4rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 18rpx;
+  border: 2rpx solid #999;
+  border-top: none;
+  border-radius: 0 0 10rpx 10rpx;
+  background: transparent;
+  box-shadow: inset 0 -2rpx 0 0 transparent;
+}
+
+.tab-icon-cinema.active::before {
+  border-color: #47a86c;
+  background: linear-gradient(180deg, rgba(71, 173, 86, 0.1) 0%, transparent 100%);
+}
+
+.tab-icon-cinema.active::after {
+  border-color: #47a86c;
+  box-shadow: inset 0 -2rpx 0 0 #47a86c;
+}
+
+/* 我的图标 - 用户头像（更精致的设计） */
+.tab-icon-my {
+  position: relative;
+}
+
+.tab-icon-my::before {
+  content: '';
+  position: absolute;
+  top: 2rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22rpx;
+  height: 22rpx;
+  border: 3rpx solid #999;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.tab-icon-my::after {
+  content: '';
+  position: absolute;
+  bottom: 2rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30rpx;
+  height: 18rpx;
+  border: 3rpx solid #999;
+  border-top: none;
+  border-radius: 0 0 18rpx 18rpx;
+  background: transparent;
+}
+
+.tab-icon-my.active::before {
+  border-color: #47a86c;
+  background: linear-gradient(135deg, rgba(71, 173, 86, 0.2) 0%, rgba(71, 173, 86, 0.05) 100%);
+}
+
+.tab-icon-my.active::after {
+  border-color: #47a86c;
+  background: linear-gradient(180deg, rgba(71, 173, 86, 0.1) 0%, transparent 100%);
+}
+

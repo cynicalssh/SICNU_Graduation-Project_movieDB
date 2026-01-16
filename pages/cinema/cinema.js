@@ -15,6 +15,27 @@ Page({
   onLoad: function() {
     var that = this
     console.log('影院页面加载')
+    // 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
+    setTimeout(function() {
+      var tabBar = that.getTabBar && that.getTabBar()
+      if (tabBar) {
+        tabBar.setData({
+          selected: 1
+        })
+        console.log('cinema onLoad: 更新tabBar selected = 1')
+      } else {
+        console.log('cinema onLoad: tabBar未找到，延迟重试')
+        setTimeout(function() {
+          var tabBar2 = that.getTabBar && that.getTabBar()
+          if (tabBar2) {
+            tabBar2.setData({
+              selected: 1
+            })
+            console.log('cinema onLoad: 延迟重试成功，更新tabBar selected = 1')
+          }
+        }, 200)
+      }
+    }, 100)
     // 加载当前城市信息
     that.loadCurrentCity()
     // 加载影院列表
@@ -23,6 +44,8 @@ Page({
 
   onShow: function() {
     var that = this
+    // 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
+    that.updateTabBar(1)
     // 页面显示时检查城市是否变化
     // 优先从全局数据获取，如果为空则从缓存读取
     var currentCity = ''
@@ -97,6 +120,37 @@ Page({
         currentDistrict: currentDistrict
       })
     }
+  },
+
+  onRouteDone: function() {
+    var that = this
+    // 路由完成后也更新tabBar
+    that.updateTabBar(1)
+  },
+
+  // 更新tabBar的通用方法
+  updateTabBar: function(index) {
+    var that = this
+    // 多次尝试更新，确保成功
+    var tryUpdate = function(attempt) {
+      if (attempt > 5) {
+        console.log('updateTabBar: 尝试次数过多，放弃')
+        return
+      }
+      var tabBar = that.getTabBar && that.getTabBar()
+      if (tabBar) {
+        tabBar.setData({
+          selected: index
+        })
+        console.log('updateTabBar: 成功更新 selected =', index, '尝试次数:', attempt)
+      } else {
+        console.log('updateTabBar: tabBar未找到，尝试次数:', attempt)
+        setTimeout(function() {
+          tryUpdate(attempt + 1)
+        }, 100 * attempt) // 递增延迟
+      }
+    }
+    tryUpdate(1)
   },
 
   // 加载当前城市

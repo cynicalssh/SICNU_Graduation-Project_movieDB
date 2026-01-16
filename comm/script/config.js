@@ -17,6 +17,9 @@ var staticUrl = 'https://static.sesine.com/wechat-weapp-movie'
 var backendApiUrl = 'http://localhost:8080/api'
 // 生产环境请修改为：var backendApiUrl = 'https://your-domain.com/api'
 
+// 是否启用后端数据同步（如果后端未启动，设置为false可避免错误提示）
+var enableBackendSync = false  // 设置为true启用后端同步，false则仅使用本地存储
+
 // ========== TMDB API 配置 ==========
 // TMDB API基础地址
 var tmdbApiUrl = 'https://api.themoviedb.org/3'
@@ -49,6 +52,7 @@ module.exports = {
     tencentKey: 'OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-W6BFI',  // 腾讯地图Key（公开测试Key，建议替换为自己的）
     amapKey: '9dfa3c1150ad05258c5626ffe10c227a',  // 高德地图Key（免费申请：https://console.amap.com/dev/key/app）
     backendApiUrl: backendApiUrl,
+    enableBackendSync: enableBackendSync,
     tmdbApiKey: tmdbApiKey,
     apiList: {
         popular: tmdbApiList.popular,

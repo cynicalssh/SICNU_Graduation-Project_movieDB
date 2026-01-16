@@ -1,0 +1,21 @@
+<view class="tab-bar">
+  <view class="tab-bar-item {{selected === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0" data-path="pages/popular/popular">
+    <view class="tab-icon-wrapper">
+      <view class="tab-icon tab-icon-movie {{selected === 0 ? 'active' : ''}}"></view>
+    </view>
+    <text class="tab-text">电影</text>
+  </view>
+  <view class="tab-bar-item {{selected === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1" data-path="pages/cinema/cinema">
+    <view class="tab-icon-wrapper">
+      <view class="tab-icon tab-icon-cinema {{selected === 1 ? 'active' : ''}}"></view>
+    </view>
+    <text class="tab-text">影院</text>
+  </view>
+  <view class="tab-bar-item {{selected === 2 ? 'active' : ''}}" bindtap="switchTab" data-index="2" data-path="pages/my/my">
+    <view class="tab-icon-wrapper">
+      <view class="tab-icon tab-icon-my {{selected === 2 ? 'active' : ''}}"></view>
+    </view>
+    <text class="tab-text">我的</text>
+  </view>
+</view>
+

@@ -18,10 +18,43 @@ Page({
       gender: 0,
       province: '',
       city: ''
-    }
+    },
+    userSignature: '', // 个人签名
+    userId: null, // 用户ID
+    currentTab: 'home', // 当前选中的标签
+    wishCount: 0, // 想看数量
+    watchedCount: 0, // 看过数量
+    galleryPictures: [] // 相册照片列表
   },
   onLoad:function(cb){
     var that = this
+    // 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
+    setTimeout(function() {
+      var tabBar = that.getTabBar && that.getTabBar()
+      if (tabBar) {
+        tabBar.setData({
+          selected: 2
+        })
+        console.log('my onLoad: 更新tabBar selected = 2')
+      } else {
+        console.log('my onLoad: tabBar未找到，延迟重试')
+        setTimeout(function() {
+          var tabBar2 = that.getTabBar && that.getTabBar()
+          if (tabBar2) {
+            tabBar2.setData({
+              selected: 2
+            })
+            console.log('my onLoad: 延迟重试成功，更新tabBar selected = 2')
+          }
+        }, 200)
+      }
+    }, 100)
+    // 加载个人签名
+    that.loadUserSignature()
+    // 加载统计数据
+    that.loadStats()
+    // 加载用户ID
+    that.loadUserId()
     // 先尝试从缓存读取用户信息
     wx.getStorage({
       key: 'userInfo',
@@ -227,6 +260,14 @@ Page({
   },
   onShow:function(){
     var that = this
+    // 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
+    that.updateTabBar(2)
+    // 重新加载统计数据
+    that.loadStats()
+    // 如果当前是相册tab，重新加载相册
+    if (that.data.currentTab === 'album') {
+      that.loadGalleryPictures()
+    }
     // 加载主题
     wx.getStorage({
       key: 'skin',
@@ -266,6 +307,38 @@ Page({
       }, 500)
     }
   },
+
+  onRouteDone: function() {
+    var that = this
+    // 路由完成后也更新tabBar
+    that.updateTabBar(2)
+  },
+
+  // 更新tabBar的通用方法
+  updateTabBar: function(index) {
+    var that = this
+    // 多次尝试更新，确保成功
+    var tryUpdate = function(attempt) {
+      if (attempt > 5) {
+        console.log('updateTabBar: 尝试次数过多，放弃')
+        return
+      }
+      var tabBar = that.getTabBar && that.getTabBar()
+      if (tabBar) {
+        tabBar.setData({
+          selected: index
+        })
+        console.log('updateTabBar: 成功更新 selected =', index, '尝试次数:', attempt)
+      } else {
+        console.log('updateTabBar: tabBar未找到，尝试次数:', attempt)
+        setTimeout(function() {
+          tryUpdate(attempt + 1)
+        }, 100 * attempt) // 递增延迟
+      }
+    }
+    tryUpdate(1)
+  },
+
   // 点击头像时触发授权（符合微信规范）
   onAvatarTap: function() {
     var that = this
@@ -466,6 +539,207 @@ Page({
 		wx.navigateTo({
 			url: "../skin/skin"
 		})
+  },
+  // 加载个人签名
+  loadUserSignature: function() {
+    var that = this
+    wx.getStorage({
+      key: 'userSignature',
+      success: function(res) {
+        if (res.data) {
+          that.setData({
+            userSignature: res.data
+          })
+        }
+      }
+    })
+  },
+  // 加载用户ID
+  loadUserId: function() {
+    var that = this
+    if (app.globalData.userId) {
+      that.setData({
+        userId: app.globalData.userId
+      })
+    } else {
+      wx.getStorage({
+        key: 'userId',
+        success: function(res) {
+          if (res.data) {
+            that.setData({
+              userId: res.data
+            })
+          }
+        }
+      })
+    }
+  },
+  // 加载统计数据
+  loadStats: function() {
+    var that = this
+    // 加载想看数量
+    wx.getStorage({
+      key: 'film_wish',
+      success: function(res) {
+        if (res.data && Array.isArray(res.data)) {
+          that.setData({
+            wishCount: res.data.length
+          })
+        }
+      }
+      })
+      // 加载看过数量
+    wx.getStorage({
+      key: 'film_watched',
+      success: function(res) {
+        if (res.data && Array.isArray(res.data)) {
+          that.setData({
+            watchedCount: res.data.length
+          })
+        }
+      }
+    })
+  },
+  // 编辑个人签名
+  editSignature: function() {
+    var that = this
+    wx.showModal({
+      title: '编辑个人签名',
+      editable: true,
+      placeholderText: '介绍下自己',
+      content: that.data.userSignature || '',
+      success: function(res) {
+        if (res.confirm) {
+          var signature = res.content || ''
+          // 限制长度
+          if (signature.length > 50) {
+            wx.showToast({
+              title: '签名不能超过50字',
+              icon: 'none'
+            })
+            return
+          }
+          that.setData({
+            userSignature: signature
+          })
+          // 保存到缓存
+          wx.setStorage({
+            key: 'userSignature',
+            data: signature
+          })
+          wx.showToast({
+            title: '保存成功',
+            icon: 'success'
+          })
+        }
+      }
+    })
+  },
+  // 切换标签
+  switchTab: function(e) {
+    var tab = e.currentTarget.dataset.tab
+    if (!tab) {
+      // 点击搜索图标
+      wx.navigateTo({
+        url: '../search/search'
+      })
+      return
+    }
+    this.setData({
+      currentTab: tab
+    })
+    console.log('切换到标签:', tab)
+    
+    // 根据标签加载不同内容
+    if (tab === 'album') {
+      // 相册标签，加载相册
+      this.loadGalleryPictures()
+    }
+  },
+  // 加载相册照片
+  loadGalleryPictures: function() {
+    var that = this
+    wx.getStorage({
+      key: 'gallery',
+      success: function(res) {
+        if (res.data && Array.isArray(res.data)) {
+          that.setData({
+            galleryPictures: res.data
+          })
+        } else {
+          that.setData({
+            galleryPictures: []
+          })
+        }
+      },
+      fail: function() {
+        that.setData({
+          galleryPictures: []
+        })
+      }
+    })
+  },
+  // 预览相册图片
+  previewGalleryImage: function(e) {
+    var index = e.currentTarget.dataset.index
+    var that = this
+    wx.previewImage({
+      current: that.data.galleryPictures[index],
+      urls: that.data.galleryPictures
+    })
+  },
+  // 查看关于我
+  viewAbout: function() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    })
+  },
+  // 查看书影音档案
+  viewArchive: function() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    })
+  },
+  // 查看影视档案
+  viewFilmArchive: function() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    })
+  },
+  // 查看想看
+  viewWish: function() {
+    wx.navigateTo({
+      url: '../wish/wish'
+    })
+  },
+  // 查看看过
+  viewWatched: function() {
+    wx.navigateTo({
+      url: '../watched/watched'
+    })
+  },
+  // 创建TOP10
+  createTop10: function() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    })
+  },
+  // 查看菜单
+  viewMenu: function() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    })
+  },
+  // 查看搜索
+  viewSearch: function() {
+    wx.navigateTo({
+      url: '../search/search'
+    })
   },
   onAvatarError: function(e) {
     var that = this

@@ -82,6 +82,7 @@ Page({
 	},
 	// 切换想看状态
 	toggleWish: function(e) {
+		var userDataSync = require('../../util/userDataSync')
 		var that = this
 		var data = e.currentTarget.dataset
 		var filmId = data.id
@@ -116,6 +117,8 @@ Page({
 							that.setData({
 								films: films
 							})
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('filmWish', newWishList)
 							wx.showToast({
 								title: '已取消想看',
 								icon: 'none',
@@ -135,6 +138,8 @@ Page({
 							that.setData({
 								films: films
 							})
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('filmWish', wishList)
 							wx.showToast({
 								title: '已添加到想看',
 								icon: 'success',
@@ -155,6 +160,8 @@ Page({
 						that.setData({
 							films: films
 						})
+						// 同步到服务器
+						userDataSync.saveUserDataToServer('filmWish', wishList)
 						wx.showToast({
 							title: '已添加到想看',
 							icon: 'success',

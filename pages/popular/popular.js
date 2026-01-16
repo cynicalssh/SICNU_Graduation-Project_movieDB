@@ -27,6 +27,28 @@ Page({
 		var that = this
 		wx.showNavigationBarLoading()
 		
+		// 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
+		setTimeout(function() {
+			var tabBar = that.getTabBar && that.getTabBar()
+			if (tabBar) {
+				tabBar.setData({
+					selected: 0
+				})
+				console.log('popular onLoad: 更新tabBar selected = 0')
+			} else {
+				console.log('popular onLoad: tabBar未找到，延迟重试')
+				setTimeout(function() {
+					var tabBar2 = that.getTabBar && that.getTabBar()
+					if (tabBar2) {
+						tabBar2.setData({
+							selected: 0
+						})
+						console.log('popular onLoad: 延迟重试成功，更新tabBar selected = 0')
+					}
+				}, 200)
+			}
+		}, 100)
+		
 		// 先设置默认标题
 		wx.setNavigationBarTitle({
 			title: '正在热映'
@@ -58,6 +80,43 @@ Page({
 		// 这样可以避免因为定位失败导致页面一直加载
 		wx.hideNavigationBarLoading()
 		that.loadFilms('popular')
+	},
+	
+	onShow: function() {
+		var that = this
+		// 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
+		that.updateTabBar(0)
+	},
+	
+	onRouteDone: function() {
+		var that = this
+		// 路由完成后也更新tabBar
+		that.updateTabBar(0)
+	},
+	
+	// 更新tabBar的通用方法
+	updateTabBar: function(index) {
+		var that = this
+		// 多次尝试更新，确保成功
+		var tryUpdate = function(attempt) {
+			if (attempt > 5) {
+				console.log('updateTabBar: 尝试次数过多，放弃')
+				return
+			}
+			var tabBar = that.getTabBar && that.getTabBar()
+			if (tabBar) {
+				tabBar.setData({
+					selected: index
+				})
+				console.log('updateTabBar: 成功更新 selected =', index, '尝试次数:', attempt)
+			} else {
+				console.log('updateTabBar: tabBar未找到，尝试次数:', attempt)
+				setTimeout(function() {
+					tryUpdate(attempt + 1)
+				}, 100 * attempt) // 递增延迟
+			}
+		}
+		tryUpdate(1)
 	},
 	
 	// Swiper切换事件
@@ -471,6 +530,7 @@ Page({
 	},
 	// 切换想看状态
 	toggleWish: function(e) {
+		var userDataSync = require('../../util/userDataSync')
 		var that = this
 		var data = e.currentTarget.dataset
 		var filmId = data.id
@@ -507,6 +567,8 @@ Page({
 							var updateObj = {}
 							updateObj[dataKey] = films
 							that.setData(updateObj)
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('filmWish', newWishList)
 							wx.showToast({
 								title: '已取消想看',
 								icon: 'none',
@@ -526,6 +588,8 @@ Page({
 							var updateObj = {}
 							updateObj[dataKey] = films
 							that.setData(updateObj)
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('filmWish', wishList)
 							wx.showToast({
 								title: '已添加到想看',
 								icon: 'success',
@@ -546,6 +610,8 @@ Page({
 						var updateObj = {}
 						updateObj[dataKey] = films
 						that.setData(updateObj)
+						// 同步到服务器
+						userDataSync.saveUserDataToServer('filmWish', wishList)
 						wx.showToast({
 							title: '已添加到想看',
 							icon: 'success',
@@ -558,6 +624,7 @@ Page({
 	},
 	// 切换看过状态
 	toggleWatched: function(e) {
+		var userDataSync = require('../../util/userDataSync')
 		var that = this
 		var data = e.currentTarget.dataset
 		var filmId = data.id
@@ -594,6 +661,8 @@ Page({
 							var updateObj = {}
 							updateObj[dataKey] = films
 							that.setData(updateObj)
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('filmWatched', newWatchedList)
 							wx.showToast({
 								title: '已取消看过',
 								icon: 'none',
@@ -613,6 +682,8 @@ Page({
 							var updateObj = {}
 							updateObj[dataKey] = films
 							that.setData(updateObj)
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('filmWatched', watchedList)
 							wx.showToast({
 								title: '已添加到看过',
 								icon: 'success',
@@ -633,6 +704,8 @@ Page({
 						var updateObj = {}
 						updateObj[dataKey] = films
 						that.setData(updateObj)
+						// 同步到服务器
+						userDataSync.saveUserDataToServer('filmWatched', watchedList)
 						wx.showToast({
 							title: '已添加到看过',
 							icon: 'success',

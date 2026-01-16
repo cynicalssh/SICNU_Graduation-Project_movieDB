@@ -1,11 +1,17 @@
 <view class="header-bar">
-    <view class="city-selector" bindtap="viewCitySelect">
-        <text class="city-icon">📍</text>
-        <text class="city-name">{{currentCity || '定位中'}}</text>
-        <text class="city-arrow">▼</text>
+    <view class="location-wrapper" bindtap="viewCitySelect">
+        <view class="location-icon-wrapper">
+            <view class="location-icon-outline"></view>
+        </view>
+        <text class="location-text">{{currentCity || '定位中'}}</text>
     </view>
-    <view class="search-bar">
-        <input class="search-txt" placeholder-class="search-txt-plc" bindfocus="viewSearch" placeholder="请输入关键词搜索" type="text"/>
+    <view class="search-wrapper" bindtap="viewSearch">
+        <view class="search-input-wrapper">
+            <text class="search-placeholder">想看什么?</text>
+            <view class="search-icon-wrapper">
+                <view class="search-icon-outline"></view>
+            </view>
+        </view>
     </view>
 </view>
 <view class="content-wrapper">

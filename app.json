@@ -10,8 +10,6 @@
     "pages/my/my",
     "pages/favorite/favorite",
     "pages/history/history",
-    "pages/wish/wish",
-    "pages/watched/watched",
     "pages/gallery/gallery",
     "pages/setting/setting",
     "pages/skin/skin",
@@ -23,11 +21,8 @@
     "pages/citySelect/citySelect",
     "pages/cinema/cinema",
     "pages/districtSelect/districtSelect",
-    "pages/cinemaSelect/cinemaSelect",
-    "pages/scheduleSelect/scheduleSelect",
-    "pages/seatSelect/seatSelect",
-    "pages/orderConfirm/orderConfirm",
-    "pages/cinemaDetail/cinemaDetail"
+    "pages/wish/wish",
+    "pages/watched/watched"
   ],
   "window": {
     "navigationBarBackgroundColor": "#47a86c",
@@ -38,24 +33,19 @@
     "enablePullDownRefresh": true
   },
   "tabBar": {
-    "color": "#686868",
-    "selectedColor": "#ff6b35",
+    "custom": true,
+    "color": "#999999",
+    "selectedColor": "#47a86c",
     "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [{
       "pagePath": "pages/popular/popular",
-      "iconPath": "dist/images/popular_icon.png",
-      "selectedIconPath": "dist/images/popular_active_icon.png",
       "text": "电影"
     }, {
       "pagePath": "pages/cinema/cinema",
-      "iconPath": "dist/images/cinema_icon.png",
-      "selectedIconPath": "dist/images/cinema_active_icon.png",
       "text": "影院"
     }, {
       "pagePath": "pages/my/my",
-      "iconPath": "dist/images/my_icon.png",
-      "selectedIconPath": "dist/images/my_active_icon.png",
       "text": "我的"
     }]
   },

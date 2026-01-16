@@ -1,22 +1,17 @@
 <!-- 顶部筛选栏 -->
 <view class="filter-bar">
-  <view class="filter-item filter-item-gradient" bindtap="selectCity">
-    <view class="filter-icon-wrapper">
-      <text class="filter-icon">📍</text>
+  <view class="location-wrapper" bindtap="selectCity">
+    <view class="location-icon-wrapper">
+      <view class="location-icon-outline"></view>
     </view>
-    <text class="filter-text">{{currentCity || '定位中'}}</text>
-    <text class="filter-arrow">▼</text>
+    <text class="location-text">{{currentCity || '定位中'}}</text>
   </view>
-  <view class="filter-item filter-item-gradient" bindtap="selectDistrict">
-    <view class="filter-icon-wrapper">
-      <text class="filter-icon">🗺️</text>
-    </view>
-    <text class="filter-text">{{currentDistrict}}</text>
-    <text class="filter-arrow">▼</text>
-  </view>
-  <view class="search-icon-wrapper" bindtap="onSearchFocus">
-    <view class="search-icon-bg">
-      <text class="search-icon">🔍</text>
+  <view class="search-wrapper" bindtap="onSearchFocus">
+    <view class="search-input-wrapper">
+      <text class="search-placeholder">想看什么?</text>
+      <view class="search-icon-wrapper">
+        <view class="search-icon-outline"></view>
+      </view>
     </view>
   </view>
 </view>

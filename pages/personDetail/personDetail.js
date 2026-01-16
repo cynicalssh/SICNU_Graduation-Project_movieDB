@@ -1,6 +1,7 @@
 var douban = require('../../comm/script/fetch')
 var util = require('../../util/util')
 var config = require('../../comm/script/config')
+var userDataSync = require('../../util/userDataSync')
 Page({
     data: {
         personDetail: {},
@@ -69,6 +70,18 @@ Page({
 					success: function(res){
 						console.log(res)
 						console.log('----设置成功----')
+						// 同步到服务器（将历史记录转换为扁平列表）
+						var historyList = []
+						person_history.forEach(function(dayData) {
+							if (dayData.persons) {
+								dayData.persons.forEach(function(personItem) {
+									if (personItem.data) {
+										historyList.push(personItem.data)
+									}
+								})
+							}
+						})
+						userDataSync.saveUserDataToServer('personHistory', historyList)
 					}
 				})
 				console.log(person_history)
@@ -93,6 +106,7 @@ Page({
 		this.onLoad(data)
 	},
 	favoritePerson: function() {
+		var userDataSync = require('../../util/userDataSync')
 		var that = this
 		// 判断原来是否收藏，是则删除，否则添加
 		wx.getStorage({
@@ -115,6 +129,8 @@ Page({
 						success: function(res){
 							console.log(res)
 							console.log('----设置成功----')
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('personFavorite', person_favorite)
 						}
 					})
 				} else {
@@ -127,6 +143,8 @@ Page({
 							that.setData({
 								isPersonFavorite: true
 							})
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('personFavorite', person_favorite)
 						}
 					})
 				}

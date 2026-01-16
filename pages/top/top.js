@@ -212,6 +212,7 @@ Page({
 	},
 	// 切换看过状态
 	toggleWatched: function(e) {
+		var userDataSync = require('../../util/userDataSync')
 		var that = this
 		var data = e.currentTarget.dataset
 		var filmId = data.id
@@ -246,6 +247,8 @@ Page({
 							that.setData({
 								films: films
 							})
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('filmWatched', newWatchedList)
 							wx.showToast({
 								title: '已取消看过',
 								icon: 'none',
@@ -265,6 +268,8 @@ Page({
 							that.setData({
 								films: films
 							})
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('filmWatched', watchedList)
 							wx.showToast({
 								title: '已添加到看过',
 								icon: 'success',
@@ -285,6 +290,8 @@ Page({
 						that.setData({
 							films: films
 						})
+						// 同步到服务器
+						userDataSync.saveUserDataToServer('filmWatched', watchedList)
 						wx.showToast({
 							title: '已添加到看过',
 							icon: 'success',

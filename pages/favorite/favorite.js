@@ -8,6 +8,7 @@ var personNullTip = {
       actionText: '去逛逛',
       routeUrl: '../../pages/popular/popular'
     }
+var userDataSync = require('../../util/userDataSync')
 Page({
   data:{
     film_favorite: [],
@@ -17,11 +18,33 @@ Page({
   },
   onLoad:function(options){
     var that = this
+    // 先尝试从服务器加载数据
+    userDataSync.loadUserDataFromServer(
+      function(serverData) {
+        // 合并服务器数据到本地
+        userDataSync.mergeUserDataFromServer(serverData)
+        // 然后从本地存储读取（已合并）
+        that.loadLocalData()
+      },
+      function(err) {
+        // 如果加载失败，直接使用本地数据
+        console.warn('从服务器加载收藏数据失败，使用本地数据:', err)
+        that.loadLocalData()
+      }
+    )
+  },
+  loadLocalData: function() {
+    var that = this
     wx.getStorage({
       key: 'film_favorite',
       success: function(res){
         that.setData({
-          film_favorite: res.data
+          film_favorite: res.data || []
+        })
+      },
+      fail: function() {
+        that.setData({
+          film_favorite: []
         })
       }
     })
@@ -29,7 +52,12 @@ Page({
       key: 'person_favorite',
       success: function(res){
         that.setData({
-          person_favorite: res.data
+          person_favorite: res.data || []
+        })
+      },
+      fail: function() {
+        that.setData({
+          person_favorite: []
         })
       }
     })

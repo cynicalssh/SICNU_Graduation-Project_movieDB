@@ -1,6 +1,7 @@
 var douban = require('../../comm/script/fetch')
 var util = require('../../util/util')
 var config = require('../../comm/script/config')
+var userDataSync = require('../../util/userDataSync')
 Page({
     data: {
         filmDetail: {},
@@ -82,6 +83,18 @@ Page({
 						success: function(res){
 							console.log(res)
 							console.log('----设置成功----')
+							// 同步到服务器（将历史记录转换为扁平列表）
+							var historyList = []
+							film_history.forEach(function(dayData) {
+								if (dayData.films) {
+									dayData.films.forEach(function(filmItem) {
+										if (filmItem.data) {
+											historyList.push(filmItem.data)
+										}
+									})
+								}
+							})
+							userDataSync.saveUserDataToServer('filmHistory', historyList)
 						}
 					})
 					console.log(film_history)
@@ -153,6 +166,8 @@ Page({
 						success: function(res){
 							console.log(res)
 							console.log('----设置成功----')
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('filmFavorite', film_favorite)
 						}
 					})
 				} else {
@@ -165,6 +180,8 @@ Page({
 							that.setData({
 								isFilmFavorite: true
 							})
+							// 同步到服务器
+							userDataSync.saveUserDataToServer('filmFavorite', film_favorite)
 						}
 					})
 				}

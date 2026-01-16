@@ -2,69 +2,120 @@
 @import "../../component/message/message.wxss";
 
 .content-wrapper {
-    padding-top: 160rpx;
+    padding-top: 120rpx;
     min-height: 100vh;
     background-color: #f5f5f5;
 }
 
 .header-bar {
-    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    padding: 24rpx 30rpx;
+    background: #ffffff;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 999;
     width: 100%;
-    background-color: #fff;
-    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, .1);
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
 }
 
-.city-selector {
+.location-wrapper {
     display: flex;
     align-items: center;
-    padding: 15rpx 20rpx;
-    border-bottom: 1px solid #eee;
+    margin-right: 20rpx;
+    padding: 0;
 }
 
-.city-icon {
-    font-size: 32rpx;
-    margin-right: 10rpx;
+.location-icon-wrapper {
+    width: 40rpx;
+    height: 40rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8rpx;
+    position: relative;
 }
 
-.city-name {
+.location-icon-outline {
+    width: 32rpx;
+    height: 32rpx;
+    border: 3rpx solid #FFC107;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    position: relative;
+}
+
+.location-icon-outline::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 8rpx;
+    height: 8rpx;
+    background: #FFC107;
+    border-radius: 50%;
+}
+
+.location-text {
+    font-size: 30rpx;
+    color: #1a1a1a;
+    font-weight: 500;
+}
+
+.search-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.search-input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20rpx 24rpx;
+    background: #f5f5f5;
+    border-radius: 50rpx;
+    min-height: 64rpx;
+    box-sizing: border-box;
+}
+
+.search-placeholder {
     font-size: 28rpx;
-    color: #333;
+    color: #999;
     flex: 1;
 }
 
-.city-arrow {
-    font-size: 20rpx;
-    color: #999;
-    margin-left: 10rpx;
+.search-icon-wrapper {
+    width: 32rpx;
+    height: 32rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 12rpx;
 }
 
-.search-bar {
-    box-sizing: border-box;
-    width: 100%;
-    height: 80rpx;
-    padding: 10rpx;
-    background-color: #eee;
-    text-align: center;
+.search-icon-outline {
+    width: 28rpx;
+    height: 28rpx;
+    border: 2rpx solid #999;
+    border-radius: 50%;
+    position: relative;
 }
 
-.search-txt {
-    display: inline-block;
-    width: 730rpx;
-    height: 60rpx;
-    background-color: #fff;
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADGUlEQVRoQ+2Z7XETQQyGpQoIFUAqwFSAdQ0QOoAKCBWQVIBTAUkFcRo4mQpIKsBUgKlAzDuzx9jLft/NxBlOfzKZ7O7p0edqw/TEhZ+4/jQDPLYHZw/MHhhpgUlCSFVfEtEbIsLPv2Jm98z8ICLbkXpGtzcDqOoJEX0mojNf8cDX7oloTURXIrKbEqYawCn+kYjOiQgQNQLlVyJyWbMptbYKwIXKLREtRiqwIaJ3U3ijGEBVobQ2WD3GirwABMKrWYoAnOW/p5Q3s5/MDGUGhRZmtmDmFwntsFbGeCIL4GIelo+FzY2L66AlVXVpZhfMjCoVkg0IWl1QAnDhqs3BN8zsNzOfiQjiOSuq+t7MVsz8LLD4g4hcZw8JLEgCOOv/8EPHKb+sjV+XRwhFX5APr1tCKQewIiKUTF/g9SLL+xvhCSL6Gjjzk4jge1WSA4D1D7orEd2ICJRolr7vN4GcuBMRNMUqiQK4ygMAX+DqUaVPVaEo+okvz2vDKAXwj6tRKruu8z1SZbFhcd/3u0BCV4dmCiBUfZrcHCKMhBEaG+5MxVILcCkiABstEYDq8/8vADP71nXdcrT5iSjigeqGlvJAqFJsReR0LIBrkL8C50yaxKg2oTJa/RFf0VgzE5Hs1cY/K7mh73uMhK+8TaMuXzhLVUMNsqnC5Toxpq4vAVdXx+pwhqoGL4dE1HRmDuDEzLaRG2R1R46FzpgGmY05VY15AUY9F5GrkqRWVTwAxHpIdQMbvpkFwMJIyRvO2OCe33XdXSBZMfS/dYqnriDV3qwCQNlzbzyp8RBn+lfs0p6B1wpUt+pLYpEHXOXAjHsdqEolEVSypgmiGMBBwBPrxHxbomhqTTVEFcBeKcR8i0E9F1IHyrqXCxSFrZlhqAnNx1UQTQB7IFAGcY5ETQkSfL0/uGM+ngJiFMAeCKoNnl2Gn/gTEnKXmp0LIE5zE9okAGMCPwORHfQfHWCvwoVyInu9OAqAEISZPTAz3p6Sz/FHAzCUaff/BvyKpM/+L+GoAFpyaQZosdqUe2YPTGnNlrNmD7RYbco9fwAQTXFAoJIHBAAAAABJRU5ErkJggg==);
-    background-position: 20rpx center;
-    background-repeat: no-repeat;
-    background-size: 50rpx;
-    border-radius: 8rpx;
-}
-
-.search-txt-plc {
-    color: #bfbfbf;
+.search-icon-outline::after {
+    content: '';
+    position: absolute;
+    bottom: -4rpx;
+    right: -4rpx;
+    width: 10rpx;
+    height: 2rpx;
+    background: #999;
+    transform: rotate(45deg);
+    border-radius: 2rpx;
 }
 
 .banner {
@@ -86,7 +137,7 @@
     background-color: #fff;
     border-bottom: 1px solid #eee;
     position: sticky;
-    top: 160rpx;
+    top: 120rpx;
     z-index: 100;
     box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, .05);
     margin-top: 0;
