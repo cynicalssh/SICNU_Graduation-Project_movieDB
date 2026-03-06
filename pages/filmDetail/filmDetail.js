@@ -1,8 +1,10 @@
 var douban = require('../../comm/script/fetch')
 var config = require('../../comm/script/config')
 var userDataSync = require('../../util/userDataSync')
+var themeUtil = require('../../util/themeUtil')
 Page({
     data: {
+        darkMode: false,
         filmDetail: {},
         showLoading: true,
 		showContent: false,
@@ -22,6 +24,7 @@ Page({
     onLoad: function(options) {
         var that = this
         var id = options.id
+		themeUtil.applyPageTheme(that)
 		douban.fetchFilmDetail.call(that, config.apiList.filmDetail, id, function(data){
 			// 加载评论和讨论（传入电影对象以便获取标题）
 			that.loadReviews(id)
@@ -32,6 +35,9 @@ Page({
 			that.recordFilmHistory(data)
 		})
     },
+	onShow: function() {
+		themeUtil.applyPageTheme(this)
+	},
 	initFilmWatchStatus: function(filmData) {
 		var that = this
 		if (!filmData || !filmData.id) {

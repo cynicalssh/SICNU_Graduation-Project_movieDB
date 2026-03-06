@@ -27,6 +27,10 @@ Page({
     isLoggingIn: false, // 是否正在登录
     drawerVisible: false, // 侧边抽屉是否打开
     darkMode: false, // 暗黑模式
+    backgroundPreviewVisible: false, // 背景预览弹层是否显示
+    isSkinGradient: true, // 当前背景是否为渐变
+    isChoosingBackground: false, // 是否正在更换背景图
+    skipNextSkinReload: false, // 下次onShow是否跳过从缓存覆盖skin
     wishCount: 0, // 想看数量
     watchedCount: 0, // 看过数量
     galleryPictures: [], // 相册照片列表
@@ -249,6 +253,41 @@ Page({
       needAuth: true
     })
   },
+  isGradientSkin: function(skinValue) {
+    if (!skinValue || typeof skinValue !== 'string') {
+      return true
+    }
+    return skinValue.indexOf('gradient(') !== -1
+  },
+  applySkin: function(skinValue, needPersist) {
+    var nextSkin = skinValue || config.skinList[0].imgUrl
+    this.setData({
+      skin: nextSkin,
+      isSkinGradient: this.isGradientSkin(nextSkin)
+    })
+    if (needPersist) {
+      wx.setStorage({
+        key: 'skin',
+        data: nextSkin
+      })
+    }
+  },
+  loadSkinPreference: function() {
+    var that = this
+    wx.getStorage({
+      key: 'skin',
+      success: function(res){
+        if (res.data == "") {
+          that.applySkin(config.skinList[0].imgUrl, false)
+        } else {
+          that.applySkin(res.data, false)
+        }
+      },
+      fail: function() {
+        that.applySkin(config.skinList[0].imgUrl, false)
+      }
+    })
+  },
   onShow:function(){
     var that = this
     that.loadThemePreference()
@@ -262,21 +301,14 @@ Page({
     if (that.data.currentTab === 'album') {
       that.loadGalleryPictures()
     }
-    // 加载主题
-    wx.getStorage({
-      key: 'skin',
-      success: function(res){
-        if (res.data == "") {
-          that.setData({
-            skin: config.skinList[0].imgUrl
-          })
-        } else {
-          that.setData({
-            skin: res.data
-          })
-        }
-      }
-    })
+    // 加载背景主题（从裁剪页返回时，避免被旧缓存瞬间覆盖）
+    if (that.data.skipNextSkinReload) {
+      that.setData({
+        skipNextSkinReload: false
+      })
+    } else {
+      that.loadSkinPreference()
+    }
     
     // 检查并更新用户信息
     if (app.globalData.userInfo && app.globalData.userInfo.avatarUrl && app.globalData.userInfo.avatarUrl !== '/resource/logo.png') {
@@ -298,6 +330,83 @@ Page({
   },
   applyThemeToNavigationBar: function(enabled) {
     themeUtil.applyNavigationBar(enabled)
+  },
+  openBackgroundPreview: function() {
+    this.setData({
+      backgroundPreviewVisible: true
+    })
+  },
+  closeBackgroundPreview: function() {
+    this.setData({
+      backgroundPreviewVisible: false
+    })
+  },
+  preventBgPreviewClose: function() {},
+  chooseBackgroundImage: function() {
+    var that = this
+    if (that.data.isChoosingBackground) {
+      return
+    }
+    that.setData({
+      isChoosingBackground: true
+    })
+    wx.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: function(res) {
+        var tempPath = (res.tempFilePaths && res.tempFilePaths.length > 0) ? res.tempFilePaths[0] : ''
+        if (!tempPath) {
+          return
+        }
+        that.openBackgroundCrop(tempPath)
+      },
+      fail: function(err) {
+        if (err && err.errMsg && err.errMsg.indexOf('cancel') !== -1) {
+          return
+        }
+        wx.showToast({
+          title: '更换背景失败',
+          icon: 'none'
+        })
+      },
+      complete: function() {
+        that.setData({
+          isChoosingBackground: false
+        })
+      }
+    })
+  },
+  openBackgroundCrop: function(tempPath) {
+    var that = this
+    wx.navigateTo({
+      url: '../backgroundCrop/backgroundCrop?src=' + encodeURIComponent(tempPath),
+      events: {
+        cropDone: function(payload) {
+          var croppedPath = payload && payload.tempFilePath ? payload.tempFilePath : ''
+          if (!croppedPath) {
+            return
+          }
+          that.applyBackgroundFromCrop(croppedPath)
+        }
+      }
+    })
+  },
+  applyBackgroundFromCrop: function(tempPath) {
+    var that = this
+    that.setData({
+      skipNextSkinReload: true,
+      backgroundPreviewVisible: false
+    })
+    wx.saveFile({
+      tempFilePath: tempPath,
+      success: function(saveRes) {
+        that.applySkin(saveRes.savedFilePath, true)
+      },
+      fail: function() {
+        that.applySkin(tempPath, true)
+      }
+    })
   },
   // 打开侧边栏
   viewMenu: function() {

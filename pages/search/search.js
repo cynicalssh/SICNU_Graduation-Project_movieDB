@@ -1,11 +1,19 @@
 var message = require('../../component/message/message')
 var douban  = require('../../comm/script/fetch')
 var config  = require('../../comm/script/config')
+var themeUtil = require('../../util/themeUtil')
 Page({
   data:{
+    darkMode: false,
     searchType: 'keyword',
     hotKeyword: config.hotKeyword,
     hotTag: config.hotTag
+  },
+  onLoad: function() {
+    themeUtil.applyPageTheme(this)
+  },
+  onShow: function() {
+    themeUtil.applyPageTheme(this)
   },
   changeSearchType: function() {
     var types = ['默认', '类型'];

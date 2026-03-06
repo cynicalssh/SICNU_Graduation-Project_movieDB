@@ -1,2 +1,11 @@
 @import "../../component/filmList/filmList.wxss";
 @import "../../component/nullTip/nullTip.wxss";
+
+.page {
+    min-height: 100vh;
+    background: #f2f6f4;
+}
+
+.theme-dark.page {
+    background: #0f1216;
+}

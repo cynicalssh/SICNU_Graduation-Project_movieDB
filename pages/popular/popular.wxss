@@ -167,7 +167,7 @@
 }
 
 .tab-item.active {
-    color: #ff6b35;
+    color: #47a86c;
     font-weight: bold;
 }
 
@@ -179,7 +179,7 @@
     transform: translateX(-50%);
     width: 80rpx;
     height: 4rpx;
-    background-color: #ff6b35;
+    background-color: #47a86c;
     border-radius: 2rpx;
 }
 

@@ -37,6 +37,14 @@ function applyPageTheme(page) {
       darkMode: enabled
     })
   }
+  if (page && typeof page.getTabBar === 'function') {
+    var tabBar = page.getTabBar()
+    if (tabBar && typeof tabBar.setData === 'function') {
+      tabBar.setData({
+        darkMode: enabled
+      })
+    }
+  }
   applyNavigationBar(enabled)
   return enabled
 }

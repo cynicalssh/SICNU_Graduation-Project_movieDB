@@ -1,9 +1,11 @@
 var douban = require('../../comm/script/fetch')
 var config = require('../../comm/script/config')
 var priceUtil = require('../../util/priceUtil')
+var themeUtil = require('../../util/themeUtil')
 
 Page({
   data: {
+    darkMode: false,
     cinemaId: '',
     cinemaName: '',
     cinemaAddress: '',
@@ -18,6 +20,7 @@ Page({
 
   onLoad: function(options) {
     var that = this
+    themeUtil.applyPageTheme(that)
     var cinemaId = options.id || ''
     var cinemaName = options.name ? decodeURIComponent(options.name) : ''
     var cinemaAddress = options.address ? decodeURIComponent(options.address) : ''
@@ -48,6 +51,9 @@ Page({
     
     // 加载正在上映的电影列表
     that.loadFilms()
+  },
+  onShow: function() {
+    themeUtil.applyPageTheme(this)
   },
 
   // 加载正在上映的电影列表
@@ -255,4 +261,3 @@ Page({
     }, 1000)
   }
 })
-

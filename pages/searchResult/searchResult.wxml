@@ -1,3 +1,4 @@
+<view class="page {{darkMode ? 'theme-dark' : ''}}">
 <import src="../../component/nullTip/nullTip.wxml"/>
 <import src="../../component/filmList/filmList.wxml"/>
 <block wx:if="{{isNull}}">
@@ -6,3 +7,4 @@
 <block wx:else>
     <template is="filmList" data="{{films: films, hasMore: hasMore, showLoading: showLoading}}"/>
 </block>
+</view>

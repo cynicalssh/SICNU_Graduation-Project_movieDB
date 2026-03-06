@@ -1,7 +1,9 @@
 var douban = require('../../comm/script/fetch')
 var config = require('../../comm/script/config')
+var themeUtil = require('../../util/themeUtil')
 Page({
 	data: {
+		darkMode: false,
 		films: [],
 		hasMore: true,
 		showLoading: true,
@@ -17,6 +19,7 @@ Page({
 	},
 	onLoad: function(options) {
 		var that = this
+		themeUtil.applyPageTheme(that)
 		that.setData({
 			url: options.url,
 			keyword: options.keyword,
@@ -29,6 +32,9 @@ Page({
 				})
 			}
 		})
+	},
+	onShow: function() {
+		themeUtil.applyPageTheme(this)
 	},
 	onPullDownRefresh: function() {
 		var that = this

@@ -1,13 +1,14 @@
 <view class="container {{darkMode ? 'theme-dark' : ''}}">
     <!-- 顶部用户信息区域 -->
-    <view class="user-header" style="{{skin.indexOf('linear-gradient') !== -1 ? 'background: ' + skin : 'background-image: url(' + skin + ')'}}">
+    <view class="user-header" style="{{isSkinGradient ? ('background: ' + skin) : ''}}" bindtap="openBackgroundPreview">
+        <image wx:if="{{!isSkinGradient}}" class="user-header-bg-image" src="{{skin}}" mode="aspectFill"></image>
         <!-- 顶部操作栏 -->
         <view class="header-top">
-            <view class="header-menu" bindtap="viewMenu">
+            <view class="header-menu" catchtap="viewMenu">
                 <text class="menu-icon">☰</text>
             </view>
-            <view class="header-title">我的</view>
-            <view class="header-actions">
+            <view class="header-center-spacer"></view>
+            <view class="header-actions" catchtap="preventBgPreviewClose">
                 <text class="action-icon">🎧</text>
                 <text class="action-icon">✉️</text>
             </view>
@@ -15,53 +16,49 @@
         
         <!-- 用户信息卡片 -->
         <view class="user-card">
-            <button class="avatar-wrapper avatar-btn" bindtap="onAvatarTap" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" plain="{{true}}">
-                <image src="{{userInfo.avatarUrl || '/resource/logo.png'}}" class="user-avatar" binderror="onAvatarError"></image>
-                <view class="avatar-camera">
-                    <text class="camera-icon">📷</text>
-                </view>
-            </button>
-            
-            <view class="user-name">
-                {{userInfo.nickName || '微信用户'}}
-                <block wx:if="{{userInfo.gender == 1}}">
-                    <view class="user-sex-male"></view>
-                </block>
-                <block wx:elif="{{userInfo.gender == 2}}">
-                    <view class="user-sex-female"></view>
-                </block>
-            </view>
-            <input wx:if="{{!isWechatAuthed}}" class="nickname-input" type="nickname" placeholder="点击输入昵称" bindblur="onNicknameBlur" />
-            <view wx:if="{{!isWechatAuthed}}" class="login-guide-text">点击头像选择微信头像，输入昵称后即完成资料</view>
-            
-            <view class="user-id-location" wx:if="{{userId}}">
-                <text>ID: {{userId}}</text>
-                <text wx:if="{{userInfo.city}}" class="location-separator"> / </text>
-                <text wx:if="{{userInfo.city}}">IP: {{userInfo.city}}</text>
-            </view>
+            <view class="user-profile-panel">
+                <view class="profile-main">
+                    <button class="avatar-wrapper avatar-btn" catchtap="onAvatarTap" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" hover-class="none">
+                        <image src="{{userInfo.avatarUrl || '/resource/logo.png'}}" class="user-avatar" binderror="onAvatarError"></image>
+                        <view class="avatar-camera">
+                            <text class="camera-icon">📷</text>
+                        </view>
+                    </button>
 
-            <view class="wechat-login-btn" wx:if="{{!isWechatAuthed}}" bindtap="startWechatLogin">
-                <text>{{isLoggingIn ? '授权中...' : '微信授权登录'}}</text>
-            </view>
-            
-            <!-- 个人签名 -->
-            <view class="user-signature-wrapper" bindtap="editSignature">
-                <view class="signature-content">
-                    <text wx:if="{{userSignature && userSignature.length > 0}}" class="signature-text">{{userSignature}}</text>
-                    <text wx:else class="signature-placeholder">介绍下自己</text>
+                    <view class="profile-info" catchtap="preventBgPreviewClose">
+                        <view class="user-name">
+                            {{userInfo.nickName || '微信用户'}}
+                            <block wx:if="{{userInfo.gender == 1}}">
+                                <view class="user-sex-male"></view>
+                            </block>
+                            <block wx:elif="{{userInfo.gender == 2}}">
+                                <view class="user-sex-female"></view>
+                            </block>
+                        </view>
+                        
+                        <view class="user-meta">
+                            <view class="user-meta-line">
+                                <text class="user-meta-label">小程序ID号：</text>
+                                <text class="user-meta-value">{{userId || '-'}}</text>
+                            </view>
+                            <view class="user-meta-line">
+                                <text class="user-meta-label">IP属地：</text>
+                                <text class="user-meta-value">{{userInfo.city || '未知'}}</text>
+                            </view>
+                        </view>
+
+                        <input wx:if="{{!isWechatAuthed}}" class="nickname-input" type="nickname" placeholder="点击输入昵称" bindblur="onNicknameBlur" />
+                        <view wx:if="{{!isWechatAuthed}}" class="login-guide-text">点击头像选择微信头像，输入昵称后即完成资料</view>
+                        
+                        <view class="wechat-login-btn" wx:if="{{!isWechatAuthed}}" catchtap="startWechatLogin">
+                            <text>{{isLoggingIn ? '授权中...' : '微信授权登录'}}</text>
+                        </view>
+                    </view>
                 </view>
-                <view class="signature-arrow">›</view>
-            </view>
-            
-            <!-- 关于我 -->
-            <view class="user-about" bindtap="viewAbout">
-                <text class="about-text">关于我</text>
-                <text class="about-arrow">›</text>
-            </view>
-            
-            <!-- 关注数（占位，可扩展） -->
-            <view class="user-stats">
-                <text class="stats-item">关注 0</text>
+                <view class="profile-intro-wrap" catchtap="editSignature">
+                    <text wx:if="{{userSignature && userSignature.length > 0}}" class="profile-intro-text">{{userSignature}}</text>
+                    <text wx:else class="profile-intro-placeholder">点击这里，填写简历</text>
+                </view>
             </view>
         </view>
     </view>
@@ -187,6 +184,24 @@
             </block>
         </view>
     </block>
+
+    <!-- 背景预览 -->
+    <view wx:if="{{backgroundPreviewVisible}}" class="bg-preview-overlay" bindtap="closeBackgroundPreview" catchtouchmove="preventBgPreviewClose">
+        <view class="bg-preview-topbar" catchtap="preventBgPreviewClose">
+            <view class="bg-preview-close" catchtap="closeBackgroundPreview">✕</view>
+            <view class="bg-preview-change-top {{isChoosingBackground ? 'disabled' : ''}}" catchtap="chooseBackgroundImage">
+                <text>{{isChoosingBackground ? '更换中...' : '更换背景'}}</text>
+            </view>
+        </view>
+        <view class="bg-preview-stage" catchtap="preventBgPreviewClose">
+            <image wx:if="{{!isSkinGradient}}" class="bg-preview-image" src="{{skin}}" mode="aspectFit"></image>
+            <view wx:else class="bg-preview-gradient" style="background: {{skin}}"></view>
+        </view>
+        <view class="bg-preview-action {{isChoosingBackground ? 'disabled' : ''}}" catchtap="chooseBackgroundImage">
+            <text class="bg-preview-action-text">{{isChoosingBackground ? '更换中...' : '更换背景图'}}</text>
+            <text class="bg-preview-action-icon">🖼️</text>
+        </view>
+    </view>
 
     <!-- 左侧抽屉遮罩 -->
     <view class="drawer-mask {{drawerVisible ? 'drawer-mask-show' : ''}}" bindtap="closeDrawer"></view>

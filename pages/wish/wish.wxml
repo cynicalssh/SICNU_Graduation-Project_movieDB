@@ -1,56 +1,50 @@
 <import src="../../component/nullTip/nullTip.wxml"/>
-<view class="tab-content">
-    <view class="tab-content-item">
-        <block wx:if="{{film_wish.length == 0}}">
-            <template is="nullTip" data="{{nullTip: nullTip}}"/>
-        </block>
-        <block wx:else>
-            <block wx:for="{{film_wish}}" wx:for-item="filmWishItem" wx:for-index="filmWishIndex" wx:key="filmWish">
-                <view class="favorite-film-item" data-id="{{filmWishItem.id}}" bindtap="viewFilmDetail">
-                    <image class="favorite-film-cover" src="{{filmWishItem.images && filmWishItem.images.large ? filmWishItem.images.large : (filmWishItem.poster_path ? 'https://image.tmdb.org/t/p/w500' + filmWishItem.poster_path : '/resource/logo.png')}}" mode="aspectFill" binderror="onImageError" data-index="{{filmWishIndex}}"></image>
-                    <view class="favorite-film-info">
-                        <view class="favorite-film-txt favorite-film-title">{{filmWishItem.title || filmWishItem.original_title || '未知电影'}}</view>
-                        <view class="favorite-film-txt" wx:if="{{filmWishItem.directors && filmWishItem.directors.length > 0}}">
-                            导演：{{filmWishItem.directors[0].name}}
-                        </view>
-                        <view class="favorite-film-txt" wx:if="{{filmWishItem.casts && filmWishItem.casts.length > 0}}">
-                            演员：
-                            <block wx:for="{{filmWishItem.casts}}" wx:for-item="filmDetailCastItem" wx:for-index="filmDetailCastIndex" wx:key="filmDetailCastItem">
-                                {{filmDetailCastItem.name}}
-                                <block wx:if="{{filmDetailCastIndex !== filmWishItem.casts.length - 1}}">/</block>
-                            </block>
-                        </view>
-                        <view class="favorite-film-txt">
-                            <block wx:if="{{filmWishItem.rating && filmWishItem.rating.average}}">
-                                评分：{{filmWishItem.rating.average}}分
-                            </block>
-                            <block wx:elif="{{filmWishItem.vote_average}}">
-                                评分：{{filmWishItem.vote_average}}分
-                            </block>
-                            <block wx:else>
-                                暂无评分
-                            </block>
-                        </view>
-                        <view class="favorite-film-txt" wx:if="{{filmWishItem.year || filmWishItem.release_date}}">
-                            上映年份：{{filmWishItem.year || (filmWishItem.release_date ? filmWishItem.release_date.split('-')[0] : '')}}年
+
+<view class="archive-page {{darkMode ? 'theme-dark' : ''}}">
+    <view class="archive-hero">
+        <view class="archive-title">想看清单</view>
+        <view class="archive-subtitle">把感兴趣的电影先存起来，随时回看</view>
+    </view>
+
+    <view class="tab-content">
+        <view class="tab-content-item">
+            <block wx:if="{{film_wish.length == 0}}">
+                <template is="nullTip" data="{{nullTip: nullTip}}"/>
+            </block>
+            <block wx:else>
+                <block wx:for="{{film_wish}}" wx:for-item="filmWishItem" wx:for-index="filmWishIndex" wx:key="filmWish">
+                    <view class="favorite-film-item" data-id="{{filmWishItem.id}}" bindtap="viewFilmDetail">
+                        <image class="favorite-film-cover" src="{{filmWishItem.images && filmWishItem.images.large ? filmWishItem.images.large : (filmWishItem.poster_path ? 'https://image.tmdb.org/t/p/w500' + filmWishItem.poster_path : '/resource/logo.png')}}" mode="aspectFill" binderror="onImageError" data-index="{{filmWishIndex}}"></image>
+                        <view class="favorite-film-info">
+                            <view class="favorite-film-txt favorite-film-title">{{filmWishItem.title || filmWishItem.original_title || '未知电影'}}</view>
+                            <view class="favorite-film-txt" wx:if="{{filmWishItem.directors && filmWishItem.directors.length > 0}}">
+                                导演：{{filmWishItem.directors[0].name}}
+                            </view>
+                            <view class="favorite-film-txt" wx:if="{{filmWishItem.casts && filmWishItem.casts.length > 0}}">
+                                演员：
+                                <block wx:for="{{filmWishItem.casts}}" wx:for-item="filmDetailCastItem" wx:for-index="filmDetailCastIndex" wx:key="filmDetailCastItem">
+                                    {{filmDetailCastItem.name}}
+                                    <block wx:if="{{filmDetailCastIndex !== filmWishItem.casts.length - 1}}"> / </block>
+                                </block>
+                            </view>
+                            <view class="favorite-film-txt">
+                                <block wx:if="{{filmWishItem.rating && filmWishItem.rating.average}}">
+                                    评分：{{filmWishItem.rating.average}}分
+                                </block>
+                                <block wx:elif="{{filmWishItem.vote_average}}">
+                                    评分：{{filmWishItem.vote_average}}分
+                                </block>
+                                <block wx:else>
+                                    暂无评分
+                                </block>
+                            </view>
+                            <view class="favorite-film-txt" wx:if="{{filmWishItem.year || filmWishItem.release_date}}">
+                                上映年份：{{filmWishItem.year || (filmWishItem.release_date ? filmWishItem.release_date.split('-')[0] : '')}}年
+                            </view>
                         </view>
                     </view>
-                </view>
+                </block>
             </block>
-        </block>
+        </view>
     </view>
 </view>
-
-
-
-
-
-
-
-
-
-
-
-
-
-

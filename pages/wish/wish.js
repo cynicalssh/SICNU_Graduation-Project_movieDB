@@ -4,13 +4,16 @@ var filmNullTip = {
       routeUrl: '../../pages/popular/popular'
     }
 var userDataSync = require('../../util/userDataSync')
+var themeUtil = require('../../util/themeUtil')
 Page({
   data:{
+    darkMode: false,
     film_wish: [],
     nullTip: filmNullTip
   },
   onLoad:function(options){
     var that = this
+    themeUtil.applyPageTheme(that)
     // 先尝试从服务器加载数据
     userDataSync.loadUserDataFromServer(
       function(serverData) {
@@ -44,6 +47,7 @@ Page({
     wx.stopPullDownRefresh()
   },
   onShow: function() {
+    themeUtil.applyPageTheme(this)
     // 页面显示时刷新数据
     this.loadWishList()
   },
@@ -72,4 +76,3 @@ Page({
     }
   }
 })
-

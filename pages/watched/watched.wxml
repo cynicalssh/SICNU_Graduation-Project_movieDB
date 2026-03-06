@@ -1,56 +1,50 @@
 <import src="../../component/nullTip/nullTip.wxml"/>
-<view class="tab-content">
-    <view class="tab-content-item">
-        <block wx:if="{{film_watched.length == 0}}">
-            <template is="nullTip" data="{{nullTip: nullTip}}"/>
-        </block>
-        <block wx:else>
-            <block wx:for="{{film_watched}}" wx:for-item="filmWatchedItem" wx:for-index="filmWatchedIndex" wx:key="filmWatched">
-                <view class="favorite-film-item" data-id="{{filmWatchedItem.id}}" bindtap="viewFilmDetail">
-                    <image class="favorite-film-cover" src="{{filmWatchedItem.images && filmWatchedItem.images.large ? filmWatchedItem.images.large : (filmWatchedItem.poster_path ? 'https://image.tmdb.org/t/p/w500' + filmWatchedItem.poster_path : '/resource/logo.png')}}" mode="aspectFill" binderror="onImageError" data-index="{{filmWatchedIndex}}"></image>
-                    <view class="favorite-film-info">
-                        <view class="favorite-film-txt favorite-film-title">{{filmWatchedItem.title || filmWatchedItem.original_title || '未知电影'}}</view>
-                        <view class="favorite-film-txt" wx:if="{{filmWatchedItem.directors && filmWatchedItem.directors.length > 0}}">
-                            导演：{{filmWatchedItem.directors[0].name}}
-                        </view>
-                        <view class="favorite-film-txt" wx:if="{{filmWatchedItem.casts && filmWatchedItem.casts.length > 0}}">
-                            演员：
-                            <block wx:for="{{filmWatchedItem.casts}}" wx:for-item="filmDetailCastItem" wx:for-index="filmDetailCastIndex" wx:key="filmDetailCastItem">
-                                {{filmDetailCastItem.name}}
-                                <block wx:if="{{filmDetailCastIndex !== filmWatchedItem.casts.length - 1}}">/</block>
-                            </block>
-                        </view>
-                        <view class="favorite-film-txt">
-                            <block wx:if="{{filmWatchedItem.rating && filmWatchedItem.rating.average}}">
-                                评分：{{filmWatchedItem.rating.average}}分
-                            </block>
-                            <block wx:elif="{{filmWatchedItem.vote_average}}">
-                                评分：{{filmWatchedItem.vote_average}}分
-                            </block>
-                            <block wx:else>
-                                暂无评分
-                            </block>
-                        </view>
-                        <view class="favorite-film-txt" wx:if="{{filmWatchedItem.year || filmWatchedItem.release_date}}">
-                            上映年份：{{filmWatchedItem.year || (filmWatchedItem.release_date ? filmWatchedItem.release_date.split('-')[0] : '')}}年
+
+<view class="archive-page {{darkMode ? 'theme-dark' : ''}}">
+    <view class="archive-hero">
+        <view class="archive-title">看过清单</view>
+        <view class="archive-subtitle">你确认看过的电影都在这里持续累计</view>
+    </view>
+
+    <view class="tab-content">
+        <view class="tab-content-item">
+            <block wx:if="{{film_watched.length == 0}}">
+                <template is="nullTip" data="{{nullTip: nullTip}}"/>
+            </block>
+            <block wx:else>
+                <block wx:for="{{film_watched}}" wx:for-item="filmWatchedItem" wx:for-index="filmWatchedIndex" wx:key="filmWatched">
+                    <view class="favorite-film-item" data-id="{{filmWatchedItem.id}}" bindtap="viewFilmDetail">
+                        <image class="favorite-film-cover" src="{{filmWatchedItem.images && filmWatchedItem.images.large ? filmWatchedItem.images.large : (filmWatchedItem.poster_path ? 'https://image.tmdb.org/t/p/w500' + filmWatchedItem.poster_path : '/resource/logo.png')}}" mode="aspectFill" binderror="onImageError" data-index="{{filmWatchedIndex}}"></image>
+                        <view class="favorite-film-info">
+                            <view class="favorite-film-txt favorite-film-title">{{filmWatchedItem.title || filmWatchedItem.original_title || '未知电影'}}</view>
+                            <view class="favorite-film-txt" wx:if="{{filmWatchedItem.directors && filmWatchedItem.directors.length > 0}}">
+                                导演：{{filmWatchedItem.directors[0].name}}
+                            </view>
+                            <view class="favorite-film-txt" wx:if="{{filmWatchedItem.casts && filmWatchedItem.casts.length > 0}}">
+                                演员：
+                                <block wx:for="{{filmWatchedItem.casts}}" wx:for-item="filmDetailCastItem" wx:for-index="filmDetailCastIndex" wx:key="filmDetailCastItem">
+                                    {{filmDetailCastItem.name}}
+                                    <block wx:if="{{filmDetailCastIndex !== filmWatchedItem.casts.length - 1}}"> / </block>
+                                </block>
+                            </view>
+                            <view class="favorite-film-txt">
+                                <block wx:if="{{filmWatchedItem.rating && filmWatchedItem.rating.average}}">
+                                    评分：{{filmWatchedItem.rating.average}}分
+                                </block>
+                                <block wx:elif="{{filmWatchedItem.vote_average}}">
+                                    评分：{{filmWatchedItem.vote_average}}分
+                                </block>
+                                <block wx:else>
+                                    暂无评分
+                                </block>
+                            </view>
+                            <view class="favorite-film-txt" wx:if="{{filmWatchedItem.year || filmWatchedItem.release_date}}">
+                                上映年份：{{filmWatchedItem.year || (filmWatchedItem.release_date ? filmWatchedItem.release_date.split('-')[0] : '')}}年
+                            </view>
                         </view>
                     </view>
-                </view>
+                </block>
             </block>
-        </block>
+        </view>
     </view>
 </view>
-
-
-
-
-
-
-
-
-
-
-
-
-
-

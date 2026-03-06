@@ -1,7 +1,9 @@
 var priceUtil = require('../../util/priceUtil')
+var themeUtil = require('../../util/themeUtil')
 
 Page({
   data: {
+    darkMode: false,
     filmId: '',
     filmTitle: '',
     cinemaId: '',
@@ -17,6 +19,7 @@ Page({
 
   onLoad: function(options) {
     var that = this
+    themeUtil.applyPageTheme(that)
     var filmId = options.filmId || ''
     var filmTitle = options.filmTitle || ''
     var cinemaId = options.cinemaId || ''
@@ -52,6 +55,9 @@ Page({
     
     // 加载场次列表
     that.loadScheduleList(todayStr)
+  },
+  onShow: function() {
+    themeUtil.applyPageTheme(this)
   },
 
   // 加载电影评分（如果未传递）
@@ -231,4 +237,3 @@ Page({
     })
   }
 })
-

@@ -1,16 +1,50 @@
-.tab-bar {
+.tab-bar-wrap {
   position: fixed;
-  bottom: 0;
   left: 0;
   right: 0;
-  height: 100rpx;
-  background: #ffffff;
-  display: flex;
-  border-top: 1rpx solid #f0f0f0;
-  padding-bottom: env(safe-area-inset-bottom);
-  box-shadow: 0 -2rpx 20rpx rgba(0, 0, 0, 0.06);
+  bottom: 0;
+  padding: 0 18rpx calc(env(safe-area-inset-bottom) + 14rpx);
   z-index: 999;
-  backdrop-filter: blur(10rpx);
+}
+
+.tab-bar {
+  position: relative;
+  height: 108rpx;
+  border-radius: 34rpx;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  pointer-events: auto;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(244, 249, 246, 0.52) 100%);
+  border: 1rpx solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 18rpx 50rpx rgba(20, 35, 29, 0.14), 0 6rpx 18rpx rgba(46, 72, 58, 0.09);
+  -webkit-backdrop-filter: blur(32rpx) saturate(180%);
+  backdrop-filter: blur(32rpx) saturate(180%);
+}
+
+.tab-bar::before {
+  content: '';
+  position: absolute;
+  left: 22rpx;
+  right: 22rpx;
+  top: 4rpx;
+  height: 38rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+
+.tab-bar::after {
+  content: '';
+  position: absolute;
+  left: 22rpx;
+  right: 22rpx;
+  bottom: -24rpx;
+  height: 30rpx;
+  border-radius: 999rpx;
+  background: rgba(20, 30, 24, 0.12);
+  filter: blur(12rpx);
+  pointer-events: none;
 }
 
 .tab-bar-item {
@@ -20,35 +54,61 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.tab-liquid-slider {
+  position: absolute;
+  left: 10rpx;
+  top: 10rpx;
+  bottom: 10rpx;
+  width: calc((100% - 20rpx) / 3);
+  border-radius: 24rpx;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.72) 0%, rgba(206, 241, 220, 0.45) 100%);
+  border: 1rpx solid rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.95), 0 8rpx 18rpx rgba(59, 136, 91, 0.18);
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .tab-icon-wrapper {
-  width: 48rpx;
-  height: 48rpx;
+  width: 50rpx;
+  height: 50rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 4rpx;
+  margin-bottom: 5rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .tab-icon {
   width: 44rpx;
   height: 44rpx;
-  transition: all 0.3s ease;
+  transition: all 0.28s ease;
+}
+
+.tab-bar-item.active .tab-icon {
+  transform: translateY(-1rpx) scale(1.03);
 }
 
 .tab-text {
   font-size: 22rpx;
-  color: #999999;
-  transition: color 0.3s ease;
+  color: #86928a;
+  transition: color 0.28s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .tab-bar-item.active .tab-text {
-  color: #47a86c;
+  color: #2f9b60;
   font-weight: 600;
 }
 
-/* 电影图标 - 胶片相机（更精致的设计） */
+/* 电影图标 */
 .tab-icon-movie {
   position: relative;
 }
@@ -61,7 +121,7 @@
   transform: translateX(-50%);
   width: 36rpx;
   height: 28rpx;
-  border: 3rpx solid #999;
+  border: 3rpx solid #8b949e;
   border-radius: 6rpx;
   background: transparent;
   box-shadow: inset 0 0 0 2rpx transparent;
@@ -74,22 +134,22 @@
   right: 4rpx;
   width: 10rpx;
   height: 10rpx;
-  border: 2rpx solid #999;
+  border: 2rpx solid #8b949e;
   border-radius: 50%;
   background: transparent;
 }
 
 .tab-icon-movie.active::before {
-  border-color: #47a86c;
-  box-shadow: inset 0 0 0 2rpx #47a86c;
+  border-color: #2f9b60;
+  box-shadow: inset 0 0 0 2rpx #2f9b60;
 }
 
 .tab-icon-movie.active::after {
-  border-color: #47a86c;
-  background: #47a86c;
+  border-color: #2f9b60;
+  background: #2f9b60;
 }
 
-/* 影院图标 - 电影屏幕（更精致的设计） */
+/* 影院图标 */
 .tab-icon-cinema {
   position: relative;
 }
@@ -102,7 +162,7 @@
   transform: translateX(-50%);
   width: 32rpx;
   height: 20rpx;
-  border: 3rpx solid #999;
+  border: 3rpx solid #8b949e;
   border-radius: 4rpx 4rpx 0 0;
   background: transparent;
 }
@@ -115,7 +175,7 @@
   transform: translateX(-50%);
   width: 40rpx;
   height: 18rpx;
-  border: 2rpx solid #999;
+  border: 2rpx solid #8b949e;
   border-top: none;
   border-radius: 0 0 10rpx 10rpx;
   background: transparent;
@@ -123,16 +183,16 @@
 }
 
 .tab-icon-cinema.active::before {
-  border-color: #47a86c;
-  background: linear-gradient(180deg, rgba(71, 173, 86, 0.1) 0%, transparent 100%);
+  border-color: #2f9b60;
+  background: linear-gradient(180deg, rgba(47, 155, 96, 0.12) 0%, transparent 100%);
 }
 
 .tab-icon-cinema.active::after {
-  border-color: #47a86c;
-  box-shadow: inset 0 -2rpx 0 0 #47a86c;
+  border-color: #2f9b60;
+  box-shadow: inset 0 -2rpx 0 0 #2f9b60;
 }
 
-/* 我的图标 - 用户头像（更精致的设计） */
+/* 我的图标 */
 .tab-icon-my {
   position: relative;
 }
@@ -145,7 +205,7 @@
   transform: translateX(-50%);
   width: 22rpx;
   height: 22rpx;
-  border: 3rpx solid #999;
+  border: 3rpx solid #8b949e;
   border-radius: 50%;
   background: transparent;
 }
@@ -158,18 +218,60 @@
   transform: translateX(-50%);
   width: 30rpx;
   height: 18rpx;
-  border: 3rpx solid #999;
+  border: 3rpx solid #8b949e;
   border-top: none;
   border-radius: 0 0 18rpx 18rpx;
   background: transparent;
 }
 
 .tab-icon-my.active::before {
-  border-color: #47a86c;
-  background: linear-gradient(135deg, rgba(71, 173, 86, 0.2) 0%, rgba(71, 173, 86, 0.05) 100%);
+  border-color: #2f9b60;
+  background: linear-gradient(135deg, rgba(47, 155, 96, 0.2) 0%, rgba(47, 155, 96, 0.06) 100%);
 }
 
 .tab-icon-my.active::after {
-  border-color: #47a86c;
-  background: linear-gradient(180deg, rgba(71, 173, 86, 0.1) 0%, transparent 100%);
+  border-color: #2f9b60;
+  background: linear-gradient(180deg, rgba(47, 155, 96, 0.12) 0%, transparent 100%);
+}
+
+.tab-bar-wrap.theme-dark .tab-bar {
+  background: linear-gradient(180deg, rgba(35, 40, 47, 0.72) 0%, rgba(24, 29, 36, 0.64) 100%);
+  border-color: rgba(177, 191, 204, 0.2);
+  box-shadow: 0 18rpx 52rpx rgba(0, 0, 0, 0.42), 0 8rpx 20rpx rgba(0, 0, 0, 0.32);
+}
+
+.tab-bar-wrap.theme-dark .tab-bar::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.tab-bar-wrap.theme-dark .tab-liquid-slider {
+  background: linear-gradient(145deg, rgba(66, 85, 103, 0.66) 0%, rgba(45, 72, 56, 0.52) 100%);
+  border-color: rgba(207, 222, 216, 0.2);
+  box-shadow: inset 0 1rpx 0 rgba(214, 229, 223, 0.2), 0 8rpx 18rpx rgba(17, 36, 27, 0.45);
+}
+
+.tab-bar-wrap.theme-dark .tab-text {
+  color: #a9b3bf;
+}
+
+.tab-bar-wrap.theme-dark .tab-bar-item.active .tab-text {
+  color: #79d39e;
+}
+
+.tab-bar-wrap.theme-dark .tab-icon-movie::before,
+.tab-bar-wrap.theme-dark .tab-icon-movie::after,
+.tab-bar-wrap.theme-dark .tab-icon-cinema::before,
+.tab-bar-wrap.theme-dark .tab-icon-cinema::after,
+.tab-bar-wrap.theme-dark .tab-icon-my::before,
+.tab-bar-wrap.theme-dark .tab-icon-my::after {
+  border-color: #a9b3bf;
+}
+
+.tab-bar-wrap.theme-dark .tab-icon-movie.active::before,
+.tab-bar-wrap.theme-dark .tab-icon-movie.active::after,
+.tab-bar-wrap.theme-dark .tab-icon-cinema.active::before,
+.tab-bar-wrap.theme-dark .tab-icon-cinema.active::after,
+.tab-bar-wrap.theme-dark .tab-icon-my.active::before,
+.tab-bar-wrap.theme-dark .tab-icon-my.active::after {
+  border-color: #79d39e;
 }

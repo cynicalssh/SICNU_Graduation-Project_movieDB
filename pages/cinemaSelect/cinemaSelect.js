@@ -1,9 +1,11 @@
 var app = getApp()
 var config = require('../../comm/script/config')
 var priceUtil = require('../../util/priceUtil')
+var themeUtil = require('../../util/themeUtil')
 
 Page({
   data: {
+    darkMode: false,
     filmId: '',
     filmTitle: '',
     currentCity: '',
@@ -33,6 +35,7 @@ Page({
 
   onLoad: function(options) {
     var that = this
+    themeUtil.applyPageTheme(that)
     var filmId = options.filmId || ''
     var filmTitle = options.filmTitle || ''
     
@@ -554,6 +557,7 @@ Page({
   // 页面显示时刷新
   onShow: function() {
     var that = this
+    themeUtil.applyPageTheme(that)
     // 从全局数据或缓存重新加载城市和区域信息
     var savedCity = ''
     var savedDistrict = '全城'
@@ -682,5 +686,4 @@ Page({
     }, 1000)
   }
 })
-
 

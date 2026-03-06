@@ -9,8 +9,10 @@ var personNullTip = {
       routeUrl: '../../pages/popular/popular'
     }
 var userDataSync = require('../../util/userDataSync')
+var themeUtil = require('../../util/themeUtil')
 Page({
   data:{
+    darkMode: false,
     film_history: [],
     person_history: [],
     show: 'film_history',
@@ -18,6 +20,7 @@ Page({
   },
   onLoad:function(options){
     var that = this
+    themeUtil.applyPageTheme(that)
     // 先尝试从服务器加载数据
     userDataSync.loadUserDataFromServer(
       function(serverData) {
@@ -32,6 +35,9 @@ Page({
         that.loadLocalData()
       }
     )
+  },
+  onShow: function() {
+    themeUtil.applyPageTheme(this)
   },
   loadLocalData: function() {
     var that = this

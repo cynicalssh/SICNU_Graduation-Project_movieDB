@@ -1,7 +1,9 @@
 var douban = require('../../comm/script/fetch')
 var config = require('../../comm/script/config')
+var themeUtil = require('../../util/themeUtil')
 Page({
 	data: {
+		darkMode: false,
 		films: [],
 		hasMore: true,
 		showLoading: true,
@@ -9,9 +11,13 @@ Page({
 	},
 	onLoad: function() {
 		var that = this
+		themeUtil.applyPageTheme(that)
 		douban.fetchFilms.call(that, config.apiList.coming, that.data.start, null, function() {
 			that.initFilmStatus()
 		})
+	},
+	onShow: function() {
+		themeUtil.applyPageTheme(this)
 	},
 	onPullDownRefresh: function() {
 		var that = this

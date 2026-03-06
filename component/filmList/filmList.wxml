@@ -80,8 +80,41 @@ module.exports = {
 
 <template name="filmList">
 <block wx:if="{{showLoading}}">
-    <view class="loading">
-        <text>玩命加载中…</text>
+    <view class="film-loading-shell">
+        <view class="film-loading-head">
+            <view class="film-loading-spinner">
+                <view class="sk-chase">
+                    <view class="sk-chase-dot"></view>
+                    <view class="sk-chase-dot"></view>
+                    <view class="sk-chase-dot"></view>
+                    <view class="sk-chase-dot"></view>
+                    <view class="sk-chase-dot"></view>
+                    <view class="sk-chase-dot"></view>
+                </view>
+            </view>
+            <text class="film-loading-title">正在加载影片数据</text>
+            <text class="film-loading-subtitle">为你获取最新排片和评分</text>
+        </view>
+        <view class="film-loading-skeleton">
+            <view class="skeleton-card">
+                <view class="skeleton-poster skeleton-shimmer"></view>
+                <view class="skeleton-content">
+                    <view class="skeleton-line skeleton-shimmer line-1"></view>
+                    <view class="skeleton-line skeleton-shimmer line-2"></view>
+                    <view class="skeleton-line skeleton-shimmer line-3"></view>
+                    <view class="skeleton-line skeleton-shimmer line-4"></view>
+                </view>
+            </view>
+            <view class="skeleton-card">
+                <view class="skeleton-poster skeleton-shimmer"></view>
+                <view class="skeleton-content">
+                    <view class="skeleton-line skeleton-shimmer line-1"></view>
+                    <view class="skeleton-line skeleton-shimmer line-2"></view>
+                    <view class="skeleton-line skeleton-shimmer line-3"></view>
+                    <view class="skeleton-line skeleton-shimmer line-4"></view>
+                </view>
+            </view>
+        </view>
     </view>
 </block>
 <block wx:else>
@@ -207,10 +240,10 @@ module.exports = {
             </view>
         </block>
         <block wx:if="{{hasMore}}">
-            <view class="loading-tip">拼命加载中…</view>
+            <view class="loading-tip loading-more">拼命加载中…</view>
         </block>
         <block wx:else>
-            <view class="loading-tip">没有更多内容了</view>
+            <view class="loading-tip loading-end">没有更多内容了</view>
         </block>
     </view>
 </block>

@@ -1,7 +1,10 @@
 var douban = require('../../comm/script/fetch')
 var config = require('../../comm/script/config')
+var themeUtil = require('../../util/themeUtil')
+var userDataSync = require('../../util/userDataSync')
 Page({
 	data: {
+		darkMode: false,
 		films: [],
 		hasMore: true,
 		showLoading: true,
@@ -9,9 +12,13 @@ Page({
 	},
 	onLoad: function() {
 		var that = this
+		themeUtil.applyPageTheme(that)
 		douban.fetchFilms.call(that, config.apiList.top, that.data.start, null, function() {
 			that.initFilmStatus()
 		})
+	},
+	onShow: function() {
+		themeUtil.applyPageTheme(this)
 	},
 	onPullDownRefresh: function() {
 		var that = this
@@ -161,6 +168,7 @@ Page({
 							that.setData({
 								films: films
 							})
+							userDataSync.saveUserDataToServer('filmWish', newWishList)
 							wx.showToast({
 								title: '已取消想看',
 								icon: 'none',
@@ -180,6 +188,7 @@ Page({
 							that.setData({
 								films: films
 							})
+							userDataSync.saveUserDataToServer('filmWish', wishList)
 							wx.showToast({
 								title: '已添加到想看',
 								icon: 'success',
@@ -200,6 +209,7 @@ Page({
 						that.setData({
 							films: films
 						})
+						userDataSync.saveUserDataToServer('filmWish', wishList)
 						wx.showToast({
 							title: '已添加到想看',
 							icon: 'success',
@@ -212,7 +222,6 @@ Page({
 	},
 	// 切换看过状态
 	toggleWatched: function(e) {
-		var userDataSync = require('../../util/userDataSync')
 		var that = this
 		var data = e.currentTarget.dataset
 		var filmId = data.id

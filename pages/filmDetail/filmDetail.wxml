@@ -1,7 +1,15 @@
 <wxs module="dateUtil" src="../../util/dateUtil.wxs"></wxs>
-<view class="container">
+<view class="container {{darkMode ? 'theme-dark' : ''}}">
     <block wx:if="{{showLoading}}">
-        <view class="loading">玩命加载中…</view>
+        <view class="fd-loading-shell">
+            <view class="fd-loading-orb"></view>
+            <view class="fd-loading-ring"></view>
+            <view class="fd-loading-title">正在加载影片详情</view>
+            <view class="fd-loading-subtitle">海报、演职员与讨论区内容准备中</view>
+            <view class="fd-loading-bar">
+                <view class="fd-loading-bar-shimmer"></view>
+            </view>
+        </view>
     </block>
     <block wx:elif="{{showContent}}">
     <!-- fd: film detail -->
@@ -125,7 +133,10 @@
                                     <text class="fd-discussion-date">{{dateUtil.formatReviewDate(discussionItem.created_at)}}</text>
                                 </view>
                             </view>
-                            <view class="fd-discussion-content" wx:if="{{discussionItem.description}}">{{discussionItem.description}}</view>
+                            <view class="fd-discussion-content {{discussionItem.isExpanded ? 'expanded' : ''}}" wx:if="{{discussionItem.description}}">{{discussionItem.description}}</view>
+                            <view class="fd-discussion-expand-btn" wx:if="{{discussionItem.needsExpand}}">
+                                <text bindtap="toggleDiscussionExpand" data-index="{{index}}">{{discussionItem.isExpanded ? '收起' : '展开全文'}}</text>
+                            </view>
                             <view class="fd-discussion-footer">
                                 <text class="fd-discussion-replies {{discussionItem.showReplies ? 'active' : ''}}" bindtap="toggleReplies" data-index="{{index}}">💬 {{discussionItem.replies_count || discussionItem.comment_count || 0}} 条回复</text>
                                 <text class="fd-discussion-score" wx:if="{{discussionItem.score}}">👍 {{discussionItem.score}}</text>

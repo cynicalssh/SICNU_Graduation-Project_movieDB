@@ -1,17 +1,56 @@
-<view class="search-hd">
-    <view class="search-area">
-        <form bindsubmit="search">
-            <view class="search-type" bindtap="changeSearchType">{{searchType == 'keyword' ? '默认' : '类型'}}</view>
-            <input class="search-txt" name="keyword" placeholder="{{searchType == 'keyword' ? '请输入电影标题、演员或导演' : '请输入影片类型，如：爱情、喜剧'}}"/>
-            <button class="search-btn" formType="submit">搜索</button>
-        </form>
+<view class="search-page {{darkMode ? 'theme-dark' : ''}}">
+    <view class="search-hero">
+        <view class="search-hero-head">
+            <view class="search-hero-copy">
+                <view class="search-hero-title">搜索电影</view>
+                <view class="search-hero-subtitle">按片名、导演、演员或类型快速查找</view>
+            </view>
+            <view class="search-hero-art">
+                <view class="hero-orb hero-orb-a"></view>
+                <view class="hero-orb hero-orb-b"></view>
+                <view class="hero-card hero-card-main"></view>
+                <view class="hero-card hero-card-sub"></view>
+                <view class="hero-ticket"></view>
+            </view>
+        </view>
     </view>
+
+    <view class="search-hd">
+        <view class="search-area">
+            <form class="search-form" bindsubmit="search">
+                <view class="search-mode-row">
+                    <view class="search-type-pill" bindtap="changeSearchType">
+                        <text class="search-type-icon">{{searchType == 'keyword' ? '🎬' : '🏷️'}}</text>
+                        <text class="search-type-text">{{searchType == 'keyword' ? '综合搜索' : '标签搜索'}}</text>
+                    </view>
+                    <text class="search-mode-tip">点左侧可切换搜索方式</text>
+                </view>
+                <view class="search-row">
+                    <view class="search-input-wrap">
+                        <text class="search-input-icon">🔍</text>
+                        <input class="search-txt" name="keyword" confirm-type="search" placeholder="{{searchType == 'keyword' ? '输入电影标题、演员或导演' : '输入影片类型，如：爱情、喜剧'}}"/>
+                    </view>
+                    <button class="search-btn" formType="submit">
+                        <text class="search-btn-icon">➤</text>
+                        <text class="search-btn-text">搜索</text>
+                    </button>
+                </view>
+            </form>
+        </view>
+    </view>
+
     <view class="search-keyword">
         <view class="search-keyword-title">热门搜索</view>
-        <view wx:for="{{hotKeyword}}" wx:for-item="hotKeywordItem" wx:key="hotKeywordItem" class="search-keyword-item" data-keyword="{{hotKeywordItem}}" bindtap="searchByKeyword">{{hotKeywordItem}}</view>
+        <view class="chip-list">
+            <view wx:for="{{hotKeyword}}" wx:for-item="hotKeywordItem" wx:key="hotKeywordItem" class="search-keyword-item" data-keyword="{{hotKeywordItem}}" bindtap="searchByKeyword">{{hotKeywordItem}}</view>
+        </view>
+
         <view class="search-keyword-title">热门标签</view>
-        <view wx:for="{{hotTag}}" wx:for-item="hotTagItem" wx:key="hotTagItem" class="search-keyword-item" data-keyword="{{hotTagItem}}" bindtap="searchByTag">{{hotTagItem}}</view>        
+        <view class="chip-list">
+            <view wx:for="{{hotTag}}" wx:for-item="hotTagItem" wx:key="hotTagItem" class="search-keyword-item tag-chip" data-keyword="{{hotTagItem}}" bindtap="searchByTag">{{hotTagItem}}</view>
+        </view>
     </view>
+
+    <import src="../../component/message/message.wxml"/>
+    <template is="message" data="{{message: message}}"/>
 </view>
-<import src="../../component/message/message.wxml"/>
-<template is="message" data="{{message: message}}"/>

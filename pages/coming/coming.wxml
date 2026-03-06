@@ -1,4 +1,6 @@
+<view class="page {{darkMode ? 'theme-dark' : ''}}">
 <import src="../../component/filmList/filmList.wxml"/>
-<template is="filmList" data="{{films: films, hasMore: hasMore, showLoading: showLoading}}"/>
+<template is="filmList" data="{{films: films, hasMore: hasMore, showLoading: showLoading, pageType: 'coming'}}"/>
 <import src="../../component/message/message.wxml"/>
 <template is="message" data="{{message: message}}"/>
+</view>

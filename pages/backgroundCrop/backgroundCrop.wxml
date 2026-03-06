@@ -1,0 +1,21 @@
+<view class="crop-page">
+  <view class="crop-topbar" style="padding-top: {{topInset}}px;">
+    <view class="crop-top-btn" bindtap="onCancel">取消</view>
+    <view class="crop-title">调整背景区域</view>
+    <view class="crop-top-btn crop-top-btn-primary" bindtap="onConfirm">{{saving ? '处理中' : '完成'}}</view>
+  </view>
+
+  <view class="crop-stage" catchtouchmove="stopTouchScroll">
+    <view class="crop-frame" style="width: {{frameWidth}}px; height: {{frameHeight}}px;" bindtouchstart="onDragStart" bindtouchmove="onDragMove" bindtouchend="onDragEnd">
+      <image class="crop-image" src="{{src}}" mode="scaleToFill" style="{{imageStyle}}"></image>
+      <view class="crop-grid"></view>
+    </view>
+  </view>
+
+  <view class="crop-footer">
+    <view class="crop-slider-label">缩放背景</view>
+    <slider class="crop-slider" min="100" max="300" value="{{sliderValue}}" activeColor="#42bd56" backgroundColor="rgba(255, 255, 255, 0.25)" block-color="#ffffff" bindchanging="onScaleChanging" bindchange="onScaleChange"></slider>
+  </view>
+
+  <canvas canvas-id="bgCropCanvas" class="crop-canvas" style="width: {{canvasWidth}}px; height: {{canvasHeight}}px;"></canvas>
+</view>
