@@ -3,13 +3,36 @@
  * 用于同步用户的收藏、浏览记录、想看、看过等数据到后端
  */
 var config = require('../comm/script/config')
-var app = getApp()
+
+function getAppInstance() {
+  try {
+    return getApp()
+  } catch (e) {
+    return null
+  }
+}
 
 /**
  * 获取用户token
  */
 function getToken() {
-  return app.globalData.token || ''
+  var app = getAppInstance()
+  if (app && app.globalData && app.globalData.token) {
+    return app.globalData.token
+  }
+
+  // 兜底读取本地token，避免App全局状态尚未就绪时丢失同步请求
+  var token = ''
+  try {
+    token = wx.getStorageSync('token') || ''
+  } catch (e) {
+    token = ''
+  }
+
+  if (token && app && app.globalData) {
+    app.globalData.token = token
+  }
+  return token
 }
 
 /**
@@ -30,6 +53,7 @@ function saveUserDataToServer(dataType, data, successCallback, failCallback) {
   
   if (!token) {
     // 用户未登录时静默跳过，不显示错误
+    console.warn('跳过同步：token为空，dataType=', dataType)
     return
   }
 
@@ -52,13 +76,13 @@ function saveUserDataToServer(dataType, data, successCallback, failCallback) {
           console.log('同步数据到服务器成功:', dataType)
           typeof successCallback == "function" && successCallback(res.data)
         } else {
-          // 静默处理失败，不输出错误
+          console.warn('同步数据到服务器失败:', dataType, res)
           typeof failCallback == "function" && failCallback(res.data ? res.data.message : '同步失败')
         }
       },
       fail: function(err) {
-        // 完全静默处理，不输出任何错误信息
-        // 后端未启动时，数据已保存在本地，不需要同步
+        // 保持页面静默，仅输出控制台日志以便排查
+        console.warn('同步请求失败:', dataType, err)
         typeof failCallback == "function" && failCallback(err.errMsg || '网络错误')
       }
     })
@@ -384,4 +408,3 @@ module.exports = {
   syncAllUserDataToServer: syncAllUserDataToServer,
   mergeUserDataFromServer: mergeUserDataFromServer
 }
-

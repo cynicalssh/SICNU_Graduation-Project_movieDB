@@ -1,3 +1,4 @@
+<view class="page {{darkMode ? 'theme-dark' : ''}}">
 <view class="header-bar">
     <view class="location-wrapper" bindtap="viewCitySelect">
         <view class="location-icon-wrapper">
@@ -16,13 +17,15 @@
 </view>
 <view class="content-wrapper">
 <!-- 轮播图（在tab栏之上，所有tab都显示） -->
-<swiper class="banner" indicator-dots="true" autoplay="true" circular="true" interval="3000" duration="500" wx:if="{{bannerList.length > 0}}">
-    <block wx:for="{{bannerList}}" wx:for-item="bannerItem" wx:for-index="bannerIndex" wx:key="banner">
-        <swiper-item data-type="{{bannerItem.type}}" data-id="{{bannerItem.id}}" bindtap="viewBannerDetail">
-            <image src="{{bannerItem.imgUrl}}" class="banner-item" mode="aspectFill" binderror="onBannerImageError"></image>
-        </swiper-item>
-    </block>
-</swiper>
+<view class="banner-shell" wx:if="{{bannerList.length > 0}}">
+    <swiper class="banner" indicator-dots="true" indicator-color="rgba(255,255,255,0.55)" indicator-active-color="#ffd166" autoplay="true" circular="true" interval="3000" duration="500">
+        <block wx:for="{{bannerList}}" wx:for-item="bannerItem" wx:for-index="bannerIndex" wx:key="banner">
+            <swiper-item data-type="{{bannerItem.type}}" data-id="{{bannerItem.id}}" bindtap="viewBannerDetail">
+                <image src="{{bannerItem.imgUrl}}" class="banner-item" mode="aspectFill" binderror="onBannerImageError"></image>
+            </swiper-item>
+        </block>
+    </swiper>
+</view>
 <!-- Tab导航栏 -->
 <view class="tab-bar">
     <view class="tab-item {{swiperCurrent === 0 ? 'active' : ''}}" bindtap="switchTab" data-tab="popular" data-index="0">
@@ -61,4 +64,5 @@
 </swiper>
 <import src="../../component/message/message.wxml"/>
 <template is="message" data="{{message: message}}"/>
+</view>
 </view>

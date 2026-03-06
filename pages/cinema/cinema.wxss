@@ -1,3 +1,8 @@
+.page {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
 .filter-bar {
   display: flex;
   align-items: center;
@@ -14,6 +19,8 @@
   align-items: center;
   margin-right: 20rpx;
   padding: 0;
+  flex-shrink: 0;
+  max-width: 240rpx;
 }
 
 .location-icon-wrapper {
@@ -51,12 +58,17 @@
   font-size: 30rpx;
   color: #1a1a1a;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .search-wrapper {
   flex: 1;
   display: flex;
   align-items: center;
+  min-width: 0;
+  max-width: 480rpx;
 }
 
 .search-input-wrapper {
@@ -389,3 +401,77 @@
   margin-top: 4rpx;
 }
 
+/* 暗黑模式 */
+.theme-dark.page {
+  background: #0f1216;
+}
+
+.theme-dark .filter-bar {
+  background: #171b22;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.35);
+}
+
+.theme-dark .location-text {
+  color: #e3e9ef;
+}
+
+.theme-dark .search-input-wrapper {
+  background: #262c35;
+}
+
+.theme-dark .search-placeholder {
+  color: #9da7b5;
+}
+
+.theme-dark .search-icon-outline {
+  border-color: #9da7b5;
+}
+
+.theme-dark .search-icon-outline::after {
+  background: #9da7b5;
+}
+
+.theme-dark .content-wrapper {
+  background: #0f1216;
+}
+
+.theme-dark .empty-icon-bg,
+.theme-dark .cinema-icon-wrapper,
+.theme-dark .cinema-item::before {
+  background: linear-gradient(135deg, #2e3440 0%, #262c35 100%);
+}
+
+.theme-dark .empty-text {
+  color: #d7dde5;
+}
+
+.theme-dark .empty-hint,
+.theme-dark .distance-text,
+.theme-dark .distance-icon,
+.theme-dark .cinema-address,
+.theme-dark .price-unit {
+  color: #9aa3af;
+}
+
+.theme-dark .cinema-item {
+  background: linear-gradient(135deg, #171b22 0%, #1e242c 100%);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.28);
+}
+
+.theme-dark .cinema-name {
+  color: #ebeff5;
+}
+
+.theme-dark .cinema-price-wrapper {
+  border-left-color: #2a3038;
+}
+
+.theme-dark .tag {
+  background-color: rgba(88, 113, 156, 0.2);
+  color: #afc1df;
+}
+
+.theme-dark .tag-gradient {
+  background: linear-gradient(135deg, rgba(88, 113, 156, 0.2) 0%, rgba(106, 88, 153, 0.2) 100%);
+  color: #c2b9e3;
+}

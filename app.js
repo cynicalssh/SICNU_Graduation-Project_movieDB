@@ -1,4 +1,5 @@
 var config = require('comm/script/config')
+var userDataSync = require('util/userDataSync')
 App({
   globalData: {
     userInfo: null,
@@ -100,6 +101,7 @@ App({
           }
         })
         console.log('使用已有token:', that.globalData.token)
+        that.syncUserDataAfterLogin()
       },
       fail: function() {
         // 没有token，调用微信登录获取code
@@ -138,6 +140,7 @@ App({
                     })
                     
                     console.log('登录成功:', data)
+                    that.syncUserDataAfterLogin()
                   } else {
                     console.error('登录失败:', res)
                   }
@@ -156,6 +159,18 @@ App({
         })
       }
     })
+  },
+  // 登录完成后，将本地数据全量同步到后端，避免先浏览后登录导致的数据丢失
+  syncUserDataAfterLogin: function() {
+    userDataSync.syncAllUserDataToServer(
+      function() {
+        console.log('登录后全量同步成功')
+      },
+      function(errMsg) {
+        // 保持静默体验，只输出调试日志
+        console.warn('登录后全量同步失败:', errMsg)
+      }
+    )
   },
   getUserInfo:function(cb){
     var that = this
@@ -390,31 +405,49 @@ App({
   initStorage: function() {
     wx.getStorageInfo({
       success: function(res) {
+        var keys = Array.isArray(res.keys) ? res.keys : []
+        var hasStorageKey = function(key) {
+          return keys.indexOf(key) !== -1
+        }
         // 判断电影收藏是否存在，没有则创建
-        if (!('film_favorite' in res.keys)) {
+        if (!hasStorageKey('film_favorite')) {
           wx.setStorage({
             key: 'film_favorite',
             data: []
           })
         }
         // 判断人物收藏是否存在，没有则创建
-        if (!('person_favorite' in res.keys)) {
+        if (!hasStorageKey('person_favorite')) {
           wx.setStorage({
             key: 'person_favorite',
             data: []
           })
         }
         // 判断电影浏览记录是否存在，没有则创建
-        if (!('film_history' in res.keys)) {
+        if (!hasStorageKey('film_history')) {
           wx.setStorage({
             key: 'film_history',
             data: []
           })
         }
         // 判断人物浏览记录是否存在，没有则创建
-        if (!('person_history' in res.keys)) {
+        if (!hasStorageKey('person_history')) {
           wx.setStorage({
             key: 'person_history',
+            data: []
+          })
+        }
+        // 判断想看数据是否存在，没有则创建
+        if (!hasStorageKey('film_wish')) {
+          wx.setStorage({
+            key: 'film_wish',
+            data: []
+          })
+        }
+        // 判断看过数据是否存在，没有则创建
+        if (!hasStorageKey('film_watched')) {
+          wx.setStorage({
+            key: 'film_watched',
             data: []
           })
         }
@@ -433,24 +466,31 @@ App({
           intro: ''
         }
         // 判断个人信息是否存在，没有则创建
-        if (!('person_info' in res.keys)) {
+        if (!hasStorageKey('person_info')) {
           wx.setStorage({
             key: 'person_info',
             data: personInfo
           })
         }
         // 判断相册数据是否存在，没有则创建
-        if (!('gallery' in res.keys)) {
+        if (!hasStorageKey('gallery')) {
           wx.setStorage({
             key: 'gallery',
             data: []
           })
         }
         // 判断背景卡选择数据是否存在，没有则创建
-        if (!('skin' in res.keys)) {
+        if (!hasStorageKey('skin')) {
           wx.setStorage({
             key: 'skin',
             data: ''
+          })
+        }
+        // 判断暗黑模式设置是否存在，没有则创建
+        if (!hasStorageKey('dark_mode_enabled')) {
+          wx.setStorage({
+            key: 'dark_mode_enabled',
+            data: false
           })
         }
       }

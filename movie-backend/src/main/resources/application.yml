@@ -1,0 +1,29 @@
+server:
+  port: 8080
+  address: 0.0.0.0  # 允许外部访问（真机测试需要）
+  servlet:
+    context-path: /api  # API路径前缀
+
+spring:
+  application:
+    name: movie-backend
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DB:movie_db}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    username: ${MYSQL_USER:root}
+    # 本地开发默认密码；可通过 MYSQL_PASSWORD 环境变量覆盖
+    password: ${MYSQL_PASSWORD:ssh123}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+
+# 微信小程序配置（测试号可以跳过，使用测试模式）
+wechat:
+  appid:   # 留空则使用测试模式，不调用微信接口
+  secret:  # 留空则使用测试模式，不调用微信接口
+
+logging:
+  level:
+    root: INFO
+    com.movie: DEBUG

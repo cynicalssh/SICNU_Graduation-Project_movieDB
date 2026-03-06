@@ -1,10 +1,11 @@
+<view class="page {{darkMode ? 'theme-dark' : ''}}">
 <!-- 顶部筛选栏 -->
 <view class="filter-bar">
   <view class="location-wrapper" bindtap="selectCity">
     <view class="location-icon-wrapper">
       <view class="location-icon-outline"></view>
     </view>
-    <text class="location-text">{{currentCity || '定位中'}}</text>
+    <text class="location-text">{{locationDisplayText}}</text>
   </view>
   <view class="search-wrapper" bindtap="onSearchFocus">
     <view class="search-input-wrapper">
@@ -70,4 +71,4 @@
     </view>
   </scroll-view>
 </view>
-
+</view>

@@ -1,8 +1,10 @@
 var douban = require('../../comm/script/fetch')
 var config = require('../../comm/script/config')
+var themeUtil = require('../../util/themeUtil')
 var app = getApp()
 Page({
 	data: {
+		darkMode: false,
 		currentTab: 'popular',  // 'popular'、'coming' 或 'top'
 		swiperCurrent: 0,  // swiper当前索引 0:热映中, 1:待上映, 2:口碑
 		// 热映中数据
@@ -25,6 +27,7 @@ Page({
 	},
 	onLoad: function() {
 		var that = this
+		themeUtil.applyPageTheme(that)
 		wx.showNavigationBarLoading()
 		
 		// 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
@@ -80,12 +83,6 @@ Page({
 		// 这样可以避免因为定位失败导致页面一直加载
 		wx.hideNavigationBarLoading()
 		that.loadFilms('popular')
-	},
-	
-	onShow: function() {
-		var that = this
-		// 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
-		that.updateTabBar(0)
 	},
 	
 	onRouteDone: function() {
@@ -439,6 +436,8 @@ Page({
 	},
 	// 页面显示时更新城市（从城市选择页面返回时）
 	onShow: function() {
+		themeUtil.applyPageTheme(this)
+		this.updateTabBar(0)
 		this.loadCurrentCity()
 	},
 	onBannerImageError: function(e) {

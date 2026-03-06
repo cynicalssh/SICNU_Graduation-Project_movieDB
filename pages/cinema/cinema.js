@@ -1,11 +1,14 @@
 var app = getApp()
 var config = require('../../comm/script/config')
 var priceUtil = require('../../util/priceUtil')
+var themeUtil = require('../../util/themeUtil')
 
 Page({
   data: {
+    darkMode: false,
     currentCity: '',
     currentDistrict: '全城',
+    locationDisplayText: '定位中',
     cinemaList: [],
     loading: false,
     hasMore: true,
@@ -14,6 +17,7 @@ Page({
 
   onLoad: function() {
     var that = this
+    themeUtil.applyPageTheme(that)
     console.log('影院页面加载')
     // 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
     setTimeout(function() {
@@ -44,6 +48,7 @@ Page({
 
   onShow: function() {
     var that = this
+    themeUtil.applyPageTheme(that)
     // 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
     that.updateTabBar(1)
     // 页面显示时检查城市是否变化
@@ -86,6 +91,8 @@ Page({
         showEmpty: false,
         loading: false
       })
+      // 更新位置显示文本
+      that.updateLocationDisplayText(currentCity, currentDistrict || '全城')
       // 重新加载影院列表
       that.loadCinemaList()
     } else if (!that.data.cinemaList || that.data.cinemaList.length === 0) {
@@ -95,6 +102,8 @@ Page({
           currentCity: currentCity,
           currentDistrict: currentDistrict || '全城'
         })
+        // 更新位置显示文本
+        that.updateLocationDisplayText(currentCity, currentDistrict || '全城')
       }
       that.loadCinemaList()
     } else if (currentCity && currentCity !== that.data.currentCity) {
@@ -112,6 +121,8 @@ Page({
         showEmpty: false,
         loading: false
       })
+      // 更新位置显示文本
+      that.updateLocationDisplayText(currentCity, currentDistrict || '全城')
       that.loadCinemaList()
     } else if (currentDistrict && currentDistrict !== that.data.currentDistrict && currentDistrict !== '全城') {
       // 如果区县变化了（可能是定位后获取到区县信息），更新显示
@@ -119,6 +130,8 @@ Page({
       that.setData({
         currentDistrict: currentDistrict
       })
+      // 更新位置显示文本
+      that.updateLocationDisplayText(that.data.currentCity, currentDistrict)
     }
   },
 
@@ -126,6 +139,24 @@ Page({
     var that = this
     // 路由完成后也更新tabBar
     that.updateTabBar(1)
+  },
+
+  // 更新位置显示文本
+  updateLocationDisplayText: function(city, district) {
+    var that = this
+    var displayText = '定位中'
+    if (city && city !== '定位中' && city !== '定位失败') {
+      if (district && district !== '全城' && district.trim() !== '') {
+        displayText = city + '·' + district
+      } else {
+        displayText = city
+      }
+    } else if (city === '定位失败') {
+      displayText = '定位失败'
+    }
+    that.setData({
+      locationDisplayText: displayText
+    })
   },
 
   // 更新tabBar的通用方法
@@ -179,6 +210,8 @@ Page({
             currentCity: currentCity || '定位中',
             currentDistrict: currentDistrict || '全城'
           })
+          // 更新位置显示文本
+          that.updateLocationDisplayText(currentCity || '定位中', currentDistrict || '全城')
           if (!currentCity) {
             // 尝试获取位置
             that.requestLocation()
@@ -192,6 +225,8 @@ Page({
         currentCity: currentCity,
         currentDistrict: currentDistrict || '全城'
       })
+      // 更新位置显示文本
+      that.updateLocationDisplayText(currentCity, currentDistrict || '全城')
     }
   },
 
@@ -215,6 +250,8 @@ Page({
         currentCity: city || '定位中',
         currentDistrict: displayDistrict
       })
+      // 更新位置显示文本
+      that.updateLocationDisplayText(city || '定位中', displayDistrict)
       // 重新加载影院列表
       that.loadCinemaList()
     }, function() {
@@ -222,6 +259,8 @@ Page({
         currentCity: '定位失败',
         currentDistrict: '全城'
       })
+      // 更新位置显示文本
+      that.updateLocationDisplayText('定位失败', '全城')
     })
   },
 
@@ -801,4 +840,3 @@ Page({
     }
   }
 })
-

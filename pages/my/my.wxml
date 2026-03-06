@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container {{darkMode ? 'theme-dark' : ''}}">
     <!-- 顶部用户信息区域 -->
     <view class="user-header" style="{{skin.indexOf('linear-gradient') !== -1 ? 'background: ' + skin : 'background-image: url(' + skin + ')'}}">
         <!-- 顶部操作栏 -->
@@ -15,12 +15,12 @@
         
         <!-- 用户信息卡片 -->
         <view class="user-card">
-            <view class="avatar-wrapper" bindtap="onAvatarTap">
+            <button class="avatar-wrapper avatar-btn" bindtap="onAvatarTap" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" plain="{{true}}">
                 <image src="{{userInfo.avatarUrl || '/resource/logo.png'}}" class="user-avatar" binderror="onAvatarError"></image>
                 <view class="avatar-camera">
                     <text class="camera-icon">📷</text>
                 </view>
-            </view>
+            </button>
             
             <view class="user-name">
                 {{userInfo.nickName || '微信用户'}}
@@ -31,11 +31,17 @@
                     <view class="user-sex-female"></view>
                 </block>
             </view>
+            <input wx:if="{{!isWechatAuthed}}" class="nickname-input" type="nickname" placeholder="点击输入昵称" bindblur="onNicknameBlur" />
+            <view wx:if="{{!isWechatAuthed}}" class="login-guide-text">点击头像选择微信头像，输入昵称后即完成资料</view>
             
             <view class="user-id-location" wx:if="{{userId}}">
                 <text>ID: {{userId}}</text>
                 <text wx:if="{{userInfo.city}}" class="location-separator"> / </text>
                 <text wx:if="{{userInfo.city}}">IP: {{userInfo.city}}</text>
+            </view>
+
+            <view class="wechat-login-btn" wx:if="{{!isWechatAuthed}}" bindtap="startWechatLogin">
+                <text>{{isLoggingIn ? '授权中...' : '微信授权登录'}}</text>
             </view>
             
             <!-- 个人签名 -->
@@ -85,6 +91,50 @@
                 </view>
                 <view class="top10-decoration">💕</view>
             </view>
+        </view>
+
+        <!-- 浏览记录 -->
+        <view class="content-section">
+            <view class="section-header" bindtap="viewHistory">
+                <text class="section-title">浏览记录</text>
+                <text class="section-desc" wx:if="{{historyCount > 0}}">已记录 {{historyCount}} 部电影</text>
+                <text class="section-arrow">›</text>
+            </view>
+
+            <block wx:if="{{recentHistoryFilms.length > 0}}">
+                <view class="recent-history-list">
+                    <block wx:for="{{recentHistoryFilms}}" wx:for-item="historyFilm" wx:key="id">
+                        <view class="recent-history-item" bindtap="viewHistoryFilmDetail" data-id="{{historyFilm.id}}">
+                            <image class="recent-history-cover" src="{{historyFilm.image || '/resource/logo.png'}}" mode="aspectFill"></image>
+                            <view class="recent-history-info">
+                                <text class="recent-history-title">{{historyFilm.title}}</text>
+                                <view class="recent-history-meta">
+                                    <text wx:if="{{historyFilm.year}}">{{historyFilm.year}}</text>
+                                    <text wx:if="{{historyFilm.year}}"> · </text>
+                                    <block wx:if="{{historyFilm.rating.average > 0}}">
+                                        <text>{{historyFilm.rating.average}} 分</text>
+                                    </block>
+                                    <block wx:else>
+                                        <text>暂无评分</text>
+                                    </block>
+                                </view>
+                                <text class="recent-history-time">{{historyFilm.date}} {{historyFilm.time}}</text>
+                            </view>
+                            <text class="recent-history-arrow">›</text>
+                        </view>
+                    </block>
+                </view>
+            </block>
+            <block wx:else>
+                <view class="history-empty-card" bindtap="goBrowseMovies">
+                    <text class="history-empty-icon">🎬</text>
+                    <view class="history-empty-info">
+                        <text class="history-empty-title">暂无浏览记录</text>
+                        <text class="history-empty-desc">去看看正在热映的电影</text>
+                    </view>
+                    <text class="history-empty-action">去逛逛</text>
+                </view>
+            </block>
         </view>
         
         <!-- 书影音档案区域 -->
@@ -137,4 +187,94 @@
             </block>
         </view>
     </block>
+
+    <!-- 左侧抽屉遮罩 -->
+    <view class="drawer-mask {{drawerVisible ? 'drawer-mask-show' : ''}}" bindtap="closeDrawer"></view>
+
+    <!-- 左侧抽屉 -->
+    <view class="side-drawer {{drawerVisible ? 'side-drawer-open' : ''}}" catchtap="preventDrawerClose">
+        <view class="drawer-header">
+            <text class="drawer-close" bindtap="closeDrawer">✕</text>
+            <view class="drawer-profile">
+                <image class="drawer-avatar" src="{{userInfo.avatarUrl || '/resource/logo.png'}}" binderror="onAvatarError"></image>
+                <view class="drawer-profile-info">
+                    <text class="drawer-name">{{userInfo.nickName || '微信用户'}}</text>
+                    <text class="drawer-subtitle">ID: {{userId || '-'}}<block wx:if="{{userInfo.city}}"> · {{userInfo.city}}</block></text>
+                </view>
+            </view>
+        </view>
+
+        <scroll-view class="drawer-content" scroll-y="true">
+            <view class="drawer-section-title">个人中心</view>
+            <view class="drawer-item" data-action="editProfile" bindtap="handleDrawerAction">
+                <text class="drawer-item-icon">👤</text>
+                <text class="drawer-item-label">个人资料</text>
+                <text class="drawer-item-arrow">›</text>
+            </view>
+            <view class="drawer-item" data-action="editNickname" bindtap="handleDrawerAction">
+                <text class="drawer-item-icon">✏️</text>
+                <text class="drawer-item-label">修改昵称</text>
+                <text class="drawer-item-arrow">›</text>
+            </view>
+            <view class="drawer-item" data-action="editSignature" bindtap="handleDrawerAction">
+                <text class="drawer-item-icon">📝</text>
+                <text class="drawer-item-label">修改签名</text>
+                <text class="drawer-item-arrow">›</text>
+            </view>
+
+            <view class="drawer-section-title">电影数据</view>
+            <view class="drawer-item" data-action="history" bindtap="handleDrawerAction">
+                <text class="drawer-item-icon">🕘</text>
+                <text class="drawer-item-label">浏览历史</text>
+                <text class="drawer-item-arrow">›</text>
+            </view>
+            <view class="drawer-item" data-action="wish" bindtap="handleDrawerAction">
+                <text class="drawer-item-icon">⭐</text>
+                <text class="drawer-item-label">想看清单（{{wishCount}}）</text>
+                <text class="drawer-item-arrow">›</text>
+            </view>
+            <view class="drawer-item" data-action="watched" bindtap="handleDrawerAction">
+                <text class="drawer-item-icon">✓</text>
+                <text class="drawer-item-label">看过清单（{{watchedCount}}）</text>
+                <text class="drawer-item-arrow">›</text>
+            </view>
+
+            <view class="drawer-section-title">设置</view>
+            <view class="drawer-item drawer-switch-item">
+                <text class="drawer-item-icon">🌙</text>
+                <text class="drawer-item-label">暗黑模式</text>
+                <switch color="#42bd56" checked="{{darkMode}}" bindchange="onDarkModeSwitch" />
+            </view>
+            <view class="drawer-item" data-action="setting" bindtap="handleDrawerAction">
+                <text class="drawer-item-icon">⚙️</text>
+                <text class="drawer-item-label">系统设置</text>
+                <text class="drawer-item-arrow">›</text>
+            </view>
+            <view class="drawer-item" data-action="feedback" bindtap="handleDrawerAction">
+                <text class="drawer-item-icon">💬</text>
+                <text class="drawer-item-label">帮助与反馈</text>
+                <text class="drawer-item-arrow">›</text>
+            </view>
+            <view class="drawer-item" data-action="about" bindtap="handleDrawerAction">
+                <text class="drawer-item-icon">ℹ️</text>
+                <text class="drawer-item-label">关于我</text>
+                <text class="drawer-item-arrow">›</text>
+            </view>
+
+            <view class="drawer-tools">
+                <view class="drawer-tool-item" data-action="orders" bindtap="handleDrawerAction">
+                    <text class="drawer-tool-icon">🧾</text>
+                    <text class="drawer-tool-label">订单</text>
+                </view>
+                <view class="drawer-tool-item" data-action="cart" bindtap="handleDrawerAction">
+                    <text class="drawer-tool-icon">🛒</text>
+                    <text class="drawer-tool-label">购物车</text>
+                </view>
+                <view class="drawer-tool-item" data-action="wallet" bindtap="handleDrawerAction">
+                    <text class="drawer-tool-icon">👛</text>
+                    <text class="drawer-tool-label">钱包</text>
+                </view>
+            </view>
+        </scroll-view>
+    </view>
 </view>

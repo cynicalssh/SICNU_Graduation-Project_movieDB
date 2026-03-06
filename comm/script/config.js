@@ -18,7 +18,7 @@ var backendApiUrl = 'http://localhost:8080/api'
 // 生产环境请修改为：var backendApiUrl = 'https://your-domain.com/api'
 
 // 是否启用后端数据同步（如果后端未启动，设置为false可避免错误提示）
-var enableBackendSync = false  // 设置为true启用后端同步，false则仅使用本地存储
+var enableBackendSync = true  // 设置为true启用后端同步，false则仅使用本地存储
 
 // ========== TMDB API 配置 ==========
 // TMDB API基础地址

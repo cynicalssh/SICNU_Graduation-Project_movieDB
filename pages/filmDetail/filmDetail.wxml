@@ -27,8 +27,15 @@
                 </view>
                 <view class="fd-intro-txt">上映年份：{{filmDetail.year}}年</view>
             </scroll-view>
-            <view class="fd-favorite {{isFilmFavorite ? 'fd-favorite-active' : ''}}" bindtap="favoriteFilm">收藏</view>
-            <view class="fd-buy-ticket" bindtap="buyTicket">选座购票</view>
+            <view class="fd-actions">
+                <view class="fd-action-btn {{isFilmWish ? 'fd-action-active' : ''}}" bindtap="toggleWish">
+                    {{isFilmWish ? '已想看' : '想看'}}
+                </view>
+                <view class="fd-action-btn {{isFilmWatched ? 'fd-action-active' : ''}}" bindtap="toggleWatched">
+                    {{isFilmWatched ? '已看过' : '看过'}}
+                </view>
+                <view class="fd-buy-ticket" bindtap="buyTicket">选座购票</view>
+            </view>
         </view>
         <view class="fd-data">
             <view class="fd-data-item">

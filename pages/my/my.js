@@ -1,4 +1,5 @@
 var config = require('../../comm/script/config')
+var themeUtil = require('../../util/themeUtil')
 var app = getApp();
 Page({
   data:{
@@ -22,12 +23,20 @@ Page({
     userSignature: '', // 个人签名
     userId: null, // 用户ID
     currentTab: 'home', // 当前选中的标签
+    isWechatAuthed: false, // 是否已微信授权登录
+    isLoggingIn: false, // 是否正在登录
+    drawerVisible: false, // 侧边抽屉是否打开
+    darkMode: false, // 暗黑模式
     wishCount: 0, // 想看数量
     watchedCount: 0, // 看过数量
-    galleryPictures: [] // 相册照片列表
+    galleryPictures: [], // 相册照片列表
+    recentHistoryFilms: [], // 最近浏览的电影
+    historyCount: 0 // 浏览记录总数（按电影去重）
   },
   onLoad:function(cb){
     var that = this
+    // 加载主题偏好
+    that.loadThemePreference()
     // 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
     setTimeout(function() {
       var tabBar = that.getTabBar && that.getTabBar()
@@ -53,6 +62,8 @@ Page({
     that.loadUserSignature()
     // 加载统计数据
     that.loadStats()
+    // 加载浏览记录摘要
+    that.loadRecentHistory()
     // 加载用户ID
     that.loadUserId()
     // 先尝试从缓存读取用户信息
@@ -128,6 +139,21 @@ Page({
         }
       }
     })
+  },
+  // 判断是否为有效微信用户信息
+  isValidUserInfo: function(userInfo) {
+    if (!userInfo) {
+      return false
+    }
+    var avatarUrl = userInfo.avatarUrl || ''
+    var nickName = userInfo.nickName || ''
+    if (!avatarUrl || avatarUrl === '/resource/logo.png') {
+      return false
+    }
+    if (!nickName || nickName === '未登录' || nickName === '微信用户') {
+      return false
+    }
+    return true
   },
   // 加载位置信息
   loadLocationInfo: function() {
@@ -219,51 +245,19 @@ Page({
   },
   // 请求用户信息授权
   requestUserInfo: function() {
-    var that = this
-    // 检查是否支持新API
-    if (wx.getUserProfile) {
-      // 新API：需要用户主动触发，但我们可以通过模拟点击来触发
-      // 注意：微信要求必须在用户点击事件中调用，所以这里先设置一个标记
-      // 在页面显示时，如果检测到需要授权，会自动触发
-      that.setData({
-        needAuth: true
-      })
-    } else {
-      // 旧API：尝试直接获取
-      wx.login({
-        success: function () {
-          wx.getUserInfo({
-            success: function (res) {
-              var userInfo = res.userInfo
-              app.globalData.userInfo = userInfo
-              // 保存到缓存
-              wx.setStorage({
-                key: 'userInfo',
-                data: userInfo
-              })
-              that.setData({
-                userInfo: userInfo,
-                needAuth: false
-              })
-              console.log('获取用户信息成功:', userInfo)
-            },
-            fail: function (err) {
-              console.warn('获取用户信息失败:', err)
-              that.setData({
-                needAuth: false
-              })
-            }
-          })
-        }
-      })
-    }
+    this.setData({
+      needAuth: true
+    })
   },
   onShow:function(){
     var that = this
+    that.loadThemePreference()
     // 更新tabBar选中状态（延迟执行确保tabBar组件已准备好）
     that.updateTabBar(2)
     // 重新加载统计数据
     that.loadStats()
+    // 重新加载浏览记录摘要
+    that.loadRecentHistory()
     // 如果当前是相册tab，重新加载相册
     if (that.data.currentTab === 'album') {
       that.loadGalleryPictures()
@@ -287,25 +281,171 @@ Page({
     // 检查并更新用户信息
     if (app.globalData.userInfo && app.globalData.userInfo.avatarUrl && app.globalData.userInfo.avatarUrl !== '/resource/logo.png') {
       that.setData({
-        userInfo: app.globalData.userInfo
+        userInfo: app.globalData.userInfo,
+        isWechatAuthed: that.isValidUserInfo(app.globalData.userInfo),
+        needAuth: !that.isValidUserInfo(app.globalData.userInfo)
       })
     } else {
-      // 如果没有用户信息，标记需要授权，并提示用户点击头像
+      // 如果没有用户信息，标记需要授权
       that.setData({
-        needAuth: true
+        needAuth: true,
+        isWechatAuthed: false
       })
-      // 自动提示用户点击头像来授权（延迟一下，确保页面已渲染）
-      setTimeout(function() {
-        if (that.data.userInfo.avatarUrl === '/resource/logo.png') {
-          wx.showModal({
-            title: '完善资料',
-            content: '点击头像即可使用微信头像',
-            showCancel: false,
-            confirmText: '知道了'
-          })
-        }
-      }, 500)
     }
+  },
+  loadThemePreference: function() {
+    themeUtil.applyPageTheme(this)
+  },
+  applyThemeToNavigationBar: function(enabled) {
+    themeUtil.applyNavigationBar(enabled)
+  },
+  // 打开侧边栏
+  viewMenu: function() {
+    this.setData({
+      drawerVisible: true
+    })
+  },
+  // 关闭侧边栏
+  closeDrawer: function() {
+    this.setData({
+      drawerVisible: false
+    })
+  },
+  // 阻止抽屉内部点击冒泡，避免误关闭
+  preventDrawerClose: function() {},
+  handleDrawerAction: function(e) {
+    var action = e.currentTarget.dataset.action
+    if (!action) {
+      return
+    }
+    this.closeDrawer()
+    switch (action) {
+      case 'editProfile':
+        wx.navigateTo({
+          url: '../editPersonInfo/editPersonInfo'
+        })
+        break
+      case 'editNickname':
+        this.quickEditNickname()
+        break
+      case 'editSignature':
+        this.editSignature()
+        break
+      case 'history':
+        this.viewHistory()
+        break
+      case 'wish':
+        this.viewWish()
+        break
+      case 'watched':
+        this.viewWatched()
+        break
+      case 'setting':
+        wx.navigateTo({
+          url: '../setting/setting'
+        })
+        break
+      case 'about':
+        this.viewAbout()
+        break
+      case 'feedback':
+        wx.showToast({
+          title: '反馈功能开发中',
+          icon: 'none'
+        })
+        break
+      case 'orders':
+        wx.showToast({
+          title: '订单功能开发中',
+          icon: 'none'
+        })
+        break
+      case 'cart':
+        wx.showToast({
+          title: '购物车功能开发中',
+          icon: 'none'
+        })
+        break
+      case 'wallet':
+        wx.showToast({
+          title: '钱包功能开发中',
+          icon: 'none'
+        })
+        break
+      default:
+        break
+    }
+  },
+  onDarkModeSwitch: function(e) {
+    var enabled = !!e.detail.value
+    this.setData({
+      darkMode: enabled
+    })
+    themeUtil.setDarkMode(enabled)
+    themeUtil.applyNavigationBar(enabled)
+  },
+  quickEditNickname: function() {
+    var that = this
+    wx.showModal({
+      title: '修改昵称',
+      editable: true,
+      placeholderText: '请输入昵称',
+      content: (that.data.userInfo && that.data.userInfo.nickName) ? that.data.userInfo.nickName : '',
+      success: function(res) {
+        if (!res.confirm) {
+          return
+        }
+        var nickName = (res.content || '').trim()
+        if (!nickName) {
+          wx.showToast({
+            title: '昵称不能为空',
+            icon: 'none'
+          })
+          return
+        }
+        that.updateUserInfoCache({
+          nickName: nickName
+        })
+        that.syncNickNameToPersonInfo(nickName)
+        wx.showToast({
+          title: '昵称已更新',
+          icon: 'success'
+        })
+      }
+    })
+  },
+  syncNickNameToPersonInfo: function(nickName) {
+    var defaultPersonInfo = {
+      name: '',
+      nickName: '',
+      gender: '',
+      age: '',
+      birthday: '',
+      constellation: '',
+      company: '',
+      school: '',
+      tel: '',
+      email: '',
+      intro: ''
+    }
+    wx.getStorage({
+      key: 'person_info',
+      success: function(res) {
+        var personInfo = res.data || defaultPersonInfo
+        personInfo.nickName = nickName
+        wx.setStorage({
+          key: 'person_info',
+          data: personInfo
+        })
+      },
+      fail: function() {
+        defaultPersonInfo.nickName = nickName
+        wx.setStorage({
+          key: 'person_info',
+          data: defaultPersonInfo
+        })
+      }
+    })
   },
 
   onRouteDone: function() {
@@ -341,188 +481,212 @@ Page({
 
   // 点击头像时触发授权（符合微信规范）
   onAvatarTap: function() {
-    var that = this
-    console.log('点击头像，当前头像URL:', that.data.userInfo.avatarUrl)
-    
-    // 如果已经有真实的头像，询问是否要重新授权
-    if (that.data.userInfo.avatarUrl && that.data.userInfo.avatarUrl !== '/resource/logo.png') {
-      wx.showModal({
-        title: '更换头像',
-        content: '是否要重新授权获取微信头像？',
-        success: function(res) {
-          if (res.confirm) {
-            // 用户确认，继续授权流程
-            that.requestUserProfile()
-          }
-        }
-      })
-      return
+    // 低版本不支持 chooseAvatar 时，点击头像走登录
+    if (!wx.canIUse || !wx.canIUse('button.open-type.chooseAvatar')) {
+      this.requestUserProfile()
     }
-    
-    // 没有头像或默认头像，直接请求授权
-    that.requestUserProfile()
   },
-  // 执行用户信息授权请求
+  // 点击按钮授权登录
+  startWechatLogin: function() {
+    this.requestUserProfile()
+  },
+  // 执行微信登录（获取code并建立会话）
   requestUserProfile: function() {
     var that = this
-    console.log('开始请求用户信息授权')
-    
-    // 请求用户信息授权
-    if (wx.getUserProfile) {
-      wx.getUserProfile({
-        desc: '用于完善用户资料',
-        success: function (res) {
-          var userInfo = res.userInfo
-          console.log('获取到的用户信息:', userInfo)
-          console.log('头像URL:', userInfo.avatarUrl)
-          
-          // 保存原始头像URL（用于后续重新下载）
-          var originalAvatarUrl = userInfo.avatarUrl
-          
-          // 如果是微信头像URL，需要下载到本地临时路径
-          if (userInfo.avatarUrl && (userInfo.avatarUrl.indexOf('wx.qlogo.cn') !== -1 || userInfo.avatarUrl.indexOf('thirdwx.qlogo.cn') !== -1)) {
-            // 下载微信头像到本地
-            wx.downloadFile({
-              url: userInfo.avatarUrl,
-              success: function(downloadRes) {
-                console.log('头像下载成功:', downloadRes.tempFilePath)
-                // 保存原始URL和临时路径
-                userInfo.avatarUrl = downloadRes.tempFilePath
-                userInfo.originalAvatarUrl = originalAvatarUrl // 保存原始URL
-                app.globalData.userInfo = userInfo
-                // 保存到缓存（包含原始URL）
-                wx.setStorage({
-                  key: 'userInfo',
-                  data: userInfo
-                })
-                that.setData({
-                  userInfo: userInfo,
-                  needAuth: false
-                })
-                wx.showToast({
-                  title: '头像更新成功',
-                  icon: 'success',
-                  duration: 1500
-                })
-              },
-              fail: function(downloadErr) {
-                console.error('头像下载失败:', downloadErr)
-                // 下载失败，直接使用原URL（需要配置downloadFile域名）
-                userInfo.originalAvatarUrl = originalAvatarUrl
-                app.globalData.userInfo = userInfo
-                wx.setStorage({
-                  key: 'userInfo',
-                  data: userInfo
-                })
-                that.setData({
-                  userInfo: userInfo,
-                  needAuth: false
-                })
-                wx.showToast({
-                  title: '头像更新成功',
-                  icon: 'success',
-                  duration: 1500
-                })
-              }
-            })
-          } else {
-            // 非微信头像URL，直接使用
-            userInfo.originalAvatarUrl = originalAvatarUrl
-            app.globalData.userInfo = userInfo
-            // 保存到缓存
-            wx.setStorage({
-              key: 'userInfo',
-              data: userInfo
-            })
-            that.setData({
-              userInfo: userInfo,
-              needAuth: false
-            })
-            console.log('获取用户信息成功:', userInfo)
-            wx.showToast({
-              title: '头像更新成功',
-              icon: 'success',
-              duration: 1500
-            })
-          }
-        },
-        fail: function (err) {
-          console.warn('获取用户信息失败:', err)
-          if (err.errMsg.indexOf('cancel') !== -1) {
-            wx.showToast({
-              title: '已取消授权',
-              icon: 'none',
-              duration: 1500
-            })
-          }
-        }
-      })
-    } else {
-      // 兼容旧版API
-      wx.login({
-        success: function () {
-          wx.getUserInfo({
-            success: function (res) {
-              var userInfo = res.userInfo
-              console.log('获取到的用户信息（旧版）:', userInfo)
-              console.log('头像URL（旧版）:', userInfo.avatarUrl)
-              
-              // 保存原始头像URL
-              var originalAvatarUrl = userInfo.avatarUrl
-              
-              // 如果是微信头像URL，需要下载到本地临时路径
-              if (userInfo.avatarUrl && (userInfo.avatarUrl.indexOf('wx.qlogo.cn') !== -1 || userInfo.avatarUrl.indexOf('thirdwx.qlogo.cn') !== -1)) {
-                wx.downloadFile({
-                  url: userInfo.avatarUrl,
-                  success: function(downloadRes) {
-                    console.log('头像下载成功（旧版）:', downloadRes.tempFilePath)
-                    userInfo.avatarUrl = downloadRes.tempFilePath
-                    userInfo.originalAvatarUrl = originalAvatarUrl
-                    app.globalData.userInfo = userInfo
-                    wx.setStorage({
-                      key: 'userInfo',
-                      data: userInfo
-                    })
-                    that.setData({
-                      userInfo: userInfo,
-                      needAuth: false
-                    })
-                  },
-                  fail: function(downloadErr) {
-                    console.error('头像下载失败（旧版）:', downloadErr)
-                    userInfo.originalAvatarUrl = originalAvatarUrl
-                    app.globalData.userInfo = userInfo
-                    wx.setStorage({
-                      key: 'userInfo',
-                      data: userInfo
-                    })
-                    that.setData({
-                      userInfo: userInfo,
-                      needAuth: false
-                    })
-                  }
-                })
-              } else {
-                userInfo.originalAvatarUrl = originalAvatarUrl
-                app.globalData.userInfo = userInfo
-                wx.setStorage({
-                  key: 'userInfo',
-                  data: userInfo
-                })
-                that.setData({
-                  userInfo: userInfo,
-                  needAuth: false
-                })
-                console.log('获取用户信息成功（旧版）:', userInfo)
-              }
-            },
-            fail: function (err) {
-              console.warn('获取用户信息失败（旧版）:', err)
-            }
-          })
-        }
-      })
+    if (that.data.isLoggingIn) {
+      return
     }
+    that.setData({
+      isLoggingIn: true
+    })
+    wx.showLoading({
+      title: '登录中',
+      mask: true
+    })
+    wx.login({
+      success: function(loginRes) {
+        var loginCode = loginRes && loginRes.code ? loginRes.code : ''
+        that.finishWechatAuthLogin(null, loginCode)
+      },
+      fail: function(err) {
+        wx.hideLoading()
+        that.setData({
+          isLoggingIn: false
+        })
+        console.warn('wx.login失败:', err)
+        wx.showToast({
+          title: '微信登录失败',
+          icon: 'none'
+        })
+      }
+    })
+  },
+  // 微信官方推荐：选择头像
+  onChooseAvatar: function(e) {
+    var that = this
+    var avatarUrl = e && e.detail ? e.detail.avatarUrl : ''
+    if (!avatarUrl) {
+      return
+    }
+    // 将临时头像保存为持久文件，避免下次失效
+    wx.saveFile({
+      tempFilePath: avatarUrl,
+      success: function(saveRes) {
+        that.updateUserInfoCache({
+          avatarUrl: saveRes.savedFilePath,
+          originalAvatarUrl: saveRes.savedFilePath
+        })
+      },
+      fail: function() {
+        that.updateUserInfoCache({
+          avatarUrl: avatarUrl,
+          originalAvatarUrl: avatarUrl
+        })
+      }
+    })
+  },
+  // 微信官方推荐：昵称输入
+  onNicknameBlur: function(e) {
+    var nickName = e && e.detail ? (e.detail.value || '').trim() : ''
+    if (!nickName) {
+      return
+    }
+    this.updateUserInfoCache({
+      nickName: nickName
+    })
+  },
+  // 更新用户信息并持久化
+  updateUserInfoCache: function(partialInfo) {
+    var merged = {}
+    var baseInfo = this.data.userInfo || {}
+    for (var key in baseInfo) {
+      merged[key] = baseInfo[key]
+    }
+    for (var p in partialInfo) {
+      merged[p] = partialInfo[p]
+    }
+    app.globalData.userInfo = merged
+    wx.setStorage({
+      key: 'userInfo',
+      data: merged
+    })
+    this.setData({
+      userInfo: merged,
+      isWechatAuthed: this.isValidUserInfo(merged)
+    })
+  },
+  // 完成微信授权登录
+  finishWechatAuthLogin: function(userInfo, loginCode) {
+    var that = this
+    // 仅建立会话，不依赖 getUserProfile 返回头像昵称
+    that.loginWithBackendOrLocal(loginCode, function() {
+      wx.hideLoading()
+      var currentUserInfo = that.data.userInfo || {
+        nickName: '微信用户',
+        avatarUrl: '/resource/logo.png',
+        gender: 0,
+        province: '',
+        city: ''
+      }
+      if (app.globalData.userLocation && app.globalData.userLocation.city) {
+        currentUserInfo.city = app.globalData.userLocation.city
+      }
+      app.globalData.userInfo = currentUserInfo
+      wx.setStorage({
+        key: 'userInfo',
+        data: currentUserInfo
+      })
+      that.setData({
+        needAuth: false,
+        userInfo: currentUserInfo,
+        isWechatAuthed: that.isValidUserInfo(currentUserInfo),
+        isLoggingIn: false
+      })
+      if (that.data.isWechatAuthed) {
+        wx.showToast({
+          title: '登录成功',
+          icon: 'success'
+        })
+      } else {
+        wx.showToast({
+          title: '已登录，请选头像昵称',
+          icon: 'none'
+        })
+      }
+    })
+  },
+  // 优先后端登录，失败则用本地会话兜底
+  loginWithBackendOrLocal: function(loginCode, done) {
+    var that = this
+    if (!loginCode) {
+      that.createLocalSession(done)
+      return
+    }
+    wx.request({
+      url: config.backendApiUrl + '/auth/wechat/login',
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json'
+      },
+      data: {
+        code: loginCode
+      },
+      timeout: 5000,
+      success: function(res) {
+        if (res.statusCode === 200 && res.data && res.data.token) {
+          app.globalData.token = res.data.token
+          app.globalData.userId = res.data.userId
+          app.globalData.openId = res.data.openId
+          wx.setStorage({
+            key: 'token',
+            data: res.data.token
+          })
+          wx.setStorage({
+            key: 'userId',
+            data: res.data.userId
+          })
+          wx.setStorage({
+            key: 'openId',
+            data: res.data.openId
+          })
+          that.setData({
+            userId: res.data.userId
+          })
+          typeof done === 'function' && done()
+        } else {
+          that.createLocalSession(done)
+        }
+      },
+      fail: function() {
+        that.createLocalSession(done)
+      }
+    })
+  },
+  // 本地会话兜底（后端不可用时）
+  createLocalSession: function(done) {
+    var that = this
+    var localUserId = Date.now()
+    var localToken = 'local_' + localUserId
+    var localOpenId = 'local_openid_' + localUserId
+    app.globalData.token = localToken
+    app.globalData.userId = localUserId
+    app.globalData.openId = localOpenId
+    wx.setStorage({
+      key: 'token',
+      data: localToken
+    })
+    wx.setStorage({
+      key: 'userId',
+      data: localUserId
+    })
+    wx.setStorage({
+      key: 'openId',
+      data: localOpenId
+    })
+    that.setData({
+      userId: localUserId
+    })
+    typeof done === 'function' && done()
   },
   onPullDownRefresh: function() {
     this.onLoad(function(){
@@ -597,6 +761,62 @@ Page({
             watchedCount: res.data.length
           })
         }
+      }
+    })
+  },
+  // 加载最近浏览记录（电影）
+  loadRecentHistory: function() {
+    var that = this
+    wx.getStorage({
+      key: 'film_history',
+      success: function(res) {
+        var historyByDay = res.data
+        if (!historyByDay || !Array.isArray(historyByDay)) {
+          that.setData({
+            recentHistoryFilms: [],
+            historyCount: 0
+          })
+          return
+        }
+        // 展平并按最近优先去重（同一电影只保留最近一次）
+        var flatList = []
+        var seen = {}
+        for (var i = 0; i < historyByDay.length; i++) {
+          var dayData = historyByDay[i]
+          if (!dayData || !dayData.films || !Array.isArray(dayData.films)) {
+            continue
+          }
+          for (var j = 0; j < dayData.films.length; j++) {
+            var filmItem = dayData.films[j]
+            if (!filmItem || !filmItem.data || !filmItem.data.id) {
+              continue
+            }
+            var filmId = String(filmItem.data.id)
+            if (!seen[filmId]) {
+              seen[filmId] = true
+              flatList.push({
+                id: filmItem.data.id,
+                title: filmItem.data.title || '未命名电影',
+                year: filmItem.data.year || '',
+                rating: filmItem.data.rating || { average: 0 },
+                image: (filmItem.data.images && (filmItem.data.images.medium || filmItem.data.images.large || filmItem.data.images.small)) || '',
+                date: dayData.date || '',
+                time: filmItem.time || ''
+              })
+            }
+          }
+        }
+
+        that.setData({
+          recentHistoryFilms: flatList.slice(0, 3),
+          historyCount: flatList.length
+        })
+      },
+      fail: function() {
+        that.setData({
+          recentHistoryFilms: [],
+          historyCount: 0
+        })
       }
     })
   },
@@ -709,6 +929,28 @@ Page({
       icon: 'none'
     })
   },
+  // 查看浏览记录（全部）
+  viewHistory: function() {
+    wx.navigateTo({
+      url: '../history/history'
+    })
+  },
+  // 查看浏览记录中的电影详情
+  viewHistoryFilmDetail: function(e) {
+    var filmId = e.currentTarget.dataset.id
+    if (!filmId) {
+      return
+    }
+    wx.navigateTo({
+      url: '../filmDetail/filmDetail?id=' + filmId
+    })
+  },
+  // 去电影主页继续浏览
+  goBrowseMovies: function() {
+    wx.switchTab({
+      url: '../popular/popular'
+    })
+  },
   // 查看想看
   viewWish: function() {
     wx.navigateTo({
@@ -723,13 +965,6 @@ Page({
   },
   // 创建TOP10
   createTop10: function() {
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
-    })
-  },
-  // 查看菜单
-  viewMenu: function() {
     wx.showToast({
       title: '功能开发中',
       icon: 'none'

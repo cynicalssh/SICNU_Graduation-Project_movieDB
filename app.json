@@ -20,6 +20,11 @@
     "pages/location/location",
     "pages/citySelect/citySelect",
     "pages/cinema/cinema",
+    "pages/cinemaDetail/cinemaDetail",
+    "pages/cinemaSelect/cinemaSelect",
+    "pages/scheduleSelect/scheduleSelect",
+    "pages/seatSelect/seatSelect",
+    "pages/orderConfirm/orderConfirm",
     "pages/districtSelect/districtSelect",
     "pages/wish/wish",
     "pages/watched/watched"

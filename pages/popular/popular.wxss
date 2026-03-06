@@ -1,6 +1,11 @@
 @import "../../component/filmList/filmList.wxss";
 @import "../../component/message/message.wxss";
 
+.page {
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
 .content-wrapper {
     padding-top: 120rpx;
     min-height: 100vh;
@@ -118,18 +123,23 @@
     border-radius: 2rpx;
 }
 
+.banner-shell {
+    margin: 16rpx 24rpx 20rpx;
+    border-radius: 24rpx;
+    overflow: hidden;
+    background-color: #e9e9e9;
+    box-shadow: 0 12rpx 28rpx rgba(0, 0, 0, 0.12);
+}
+
 .banner {
-    width: 750rpx;
+    width: 100%;
     height: 300rpx;
-    margin-top: 0;
-    background-color: #eee;
     animation: fadeIn 1.8s;
-    margin-bottom: 0;
 }
 
 .banner-item {
-    width: 750rpx;
-    height: 300rpx;
+    width: 100%;
+    height: 100%;
 }
 
 .tab-bar {
@@ -188,4 +198,53 @@
     width: 100%;
     height: 100%;
     background-color: #f5f5f5;
+}
+
+/* 暗黑模式 */
+.theme-dark.page {
+    background-color: #0f1216;
+}
+
+.theme-dark .content-wrapper,
+.theme-dark .tab-swiper,
+.theme-dark .swiper-content {
+    background-color: #0f1216;
+}
+
+.theme-dark .header-bar {
+    background: #171b22;
+    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.35);
+}
+
+.theme-dark .location-text {
+    color: #e3e9ef;
+}
+
+.theme-dark .search-input-wrapper {
+    background: #262c35;
+}
+
+.theme-dark .search-placeholder {
+    color: #9da7b5;
+}
+
+.theme-dark .search-icon-outline {
+    border-color: #9da7b5;
+}
+
+.theme-dark .search-icon-outline::after {
+    background: #9da7b5;
+}
+
+.theme-dark .banner-shell {
+    background-color: #20252d;
+}
+
+.theme-dark .tab-bar {
+    background-color: #171b22;
+    border-bottom-color: #252b34;
+}
+
+.theme-dark .tab-item {
+    color: #b6bec8;
 }

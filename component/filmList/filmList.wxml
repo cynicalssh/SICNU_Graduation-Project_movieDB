@@ -87,7 +87,8 @@ module.exports = {
 <block wx:else>
     <view class="film">
         <block wx:for="{{films}}" wx:for-index="filmIndex" wx:for-item="filmItem" wx:key="film">
-            <view class="film-item">
+            <!-- 整个影片条目可点击进入详情，右侧按钮使用 catchtap 不会触发本事件 -->
+            <view class="film-item" data-id="{{filmItem.id}}" bindtap="viewFilmDetail">
                 <view class="film-poster">
                     <image src="{{filmItem.images.large || filmItem.images.medium || ''}}" class="film-poster-img" mode="aspectFill" binderror="onImageError"></image>
                 </view>
