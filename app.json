@@ -5,6 +5,7 @@
     "pages/top/top",
     "pages/search/search",
     "pages/filmDetail/filmDetail",
+    "pages/filmGraph/filmGraph",
     "pages/personDetail/personDetail",
     "pages/searchResult/searchResult",
     "pages/my/my",

@@ -1,0 +1,166 @@
+<view class="graph-page {{darkMode ? 'theme-dark' : ''}}">
+  <block wx:if="{{graphLoading}}">
+    <view class="graph-loading">
+      <view class="graph-loading-ring"></view>
+      <view class="graph-loading-text">正在构建电影关系图谱</view>
+      <view class="graph-loading-subtext">导演、演员、类型、系列关系分析中</view>
+    </view>
+  </block>
+
+  <block wx:elif="{{graphError}}">
+    <view class="graph-error-card">
+      <view class="graph-error-title">图谱加载失败</view>
+      <view class="graph-error-msg">{{graphError}}</view>
+      <view class="graph-retry-btn" bindtap="retryGraph">重试</view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="graph-root-card">
+      <image class="graph-root-poster" src="{{graphData.movie.posterUrl}}" mode="aspectFill" wx:if="{{graphData.movie.posterUrl}}"></image>
+      <view class="graph-root-placeholder" wx:else>图</view>
+      <view class="graph-root-info">
+        <view class="graph-root-title">{{graphData.movie.title || movieTitle}}</view>
+        <view class="graph-root-meta">
+          <text wx:if="{{graphData.movie.year}}">{{graphData.movie.year}}</text>
+          <text wx:if="{{graphData.movie.voteAverage}}"> · {{graphData.movie.voteAverage}}分</text>
+        </view>
+        <view class="graph-root-overview">{{graphData.movie.overview || '暂无剧情简介'}}</view>
+      </view>
+    </view>
+
+    <view class="graph-section-title">知识图谱关系</view>
+
+    <view class="graph-group">
+      <view class="graph-group-title">导演关系</view>
+      <view class="graph-node-list" wx:if="{{graphData.relations.directors.length > 0}}">
+        <view
+          class="graph-node-item"
+          wx:for="{{graphData.relations.directors}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          data-type="{{item.type}}"
+          data-name="{{item.name}}"
+          bindtap="onTapRelationNode"
+        >
+          <text class="graph-node-text">{{item.name}}</text>
+          <text class="graph-node-arrow">›</text>
+        </view>
+      </view>
+      <view class="graph-empty" wx:else>暂无导演关系数据</view>
+    </view>
+
+    <view class="graph-group">
+      <view class="graph-group-title">演员关系</view>
+      <view class="graph-node-list" wx:if="{{graphData.relations.actors.length > 0}}">
+        <view
+          class="graph-node-item"
+          wx:for="{{graphData.relations.actors}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          data-type="{{item.type}}"
+          data-name="{{item.name}}"
+          bindtap="onTapRelationNode"
+        >
+          <text class="graph-node-text">{{item.name}}</text>
+          <text class="graph-node-sub" wx:if="{{item.character}}">饰{{item.character}}</text>
+          <text class="graph-node-arrow">›</text>
+        </view>
+      </view>
+      <view class="graph-empty" wx:else>暂无演员关系数据</view>
+    </view>
+
+    <view class="graph-group">
+      <view class="graph-group-title">类型关系</view>
+      <view class="graph-node-list" wx:if="{{graphData.relations.genres.length > 0}}">
+        <view
+          class="graph-node-item"
+          wx:for="{{graphData.relations.genres}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          data-type="{{item.type}}"
+          data-name="{{item.name}}"
+          bindtap="onTapRelationNode"
+        >
+          <text class="graph-node-text">{{item.name}}</text>
+          <text class="graph-node-arrow">›</text>
+        </view>
+      </view>
+      <view class="graph-empty" wx:else>暂无类型关系数据</view>
+    </view>
+
+    <view class="graph-group">
+      <view class="graph-group-title">系列电影关系</view>
+      <view class="graph-node-list" wx:if="{{graphData.relations.series.length > 0}}">
+        <view
+          class="graph-node-item"
+          wx:for="{{graphData.relations.series}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          data-type="{{item.type}}"
+          data-name="{{item.name}}"
+          bindtap="onTapRelationNode"
+        >
+          <text class="graph-node-text">{{item.name}}</text>
+          <text class="graph-node-sub" wx:if="{{item.movieCount}}">{{item.movieCount}}部</text>
+          <text class="graph-node-arrow">›</text>
+        </view>
+      </view>
+      <view class="graph-empty" wx:else>该电影暂无系列归属</view>
+    </view>
+
+    <view class="graph-sample" wx:if="{{graphData.sample}}">
+      <view class="graph-sample-title">示例关系：{{graphData.sample.relationType}} - {{graphData.sample.name}}</view>
+      <view class="graph-sample-films">
+        <view
+          class="graph-sample-film"
+          wx:for="{{graphData.sample.films}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="viewSampleFilmDetail"
+        >
+          {{item.title}}
+        </view>
+      </view>
+    </view>
+
+    <view class="graph-related-block" wx:if="{{selectedNodeLabel}}">
+      <view class="graph-related-title">{{selectedNodeLabel}} 关联电影</view>
+
+      <block wx:if="{{relationFilmsLoading}}">
+        <view class="graph-mini-loading">
+          <view class="graph-mini-loader-dot"></view>
+          <view class="graph-mini-loader-dot"></view>
+          <view class="graph-mini-loader-dot"></view>
+          <text>加载中</text>
+        </view>
+      </block>
+
+      <block wx:elif="{{relationFilmsError}}">
+        <view class="graph-related-error">{{relationFilmsError}}</view>
+        <view class="graph-retry-btn mini" bindtap="retryRelationFilms">重试</view>
+      </block>
+
+      <block wx:elif="{{relationFilms.length === 0}}">
+        <view class="graph-empty">暂无关联电影</view>
+      </block>
+
+      <block wx:else>
+        <view class="graph-film-list">
+          <view class="graph-film-item" wx:for="{{relationFilms}}" wx:key="id" data-id="{{item.id}}" bindtap="viewFilmDetail">
+            <image class="graph-film-poster" src="{{item.posterUrl}}" mode="aspectFill" wx:if="{{item.posterUrl}}"></image>
+            <view class="graph-film-fallback" wx:else>无海报</view>
+            <view class="graph-film-info">
+              <view class="graph-film-title">{{item.title}}</view>
+              <view class="graph-film-meta">
+                <text wx:if="{{item.year}}">{{item.year}}</text>
+                <text wx:if="{{item.voteAverage}}"> · {{item.voteAverage}}分</text>
+              </view>
+            </view>
+            <view class="graph-film-arrow">›</view>
+          </view>
+        </view>
+      </block>
+    </view>
+  </block>
+</view>

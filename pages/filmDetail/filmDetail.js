@@ -180,6 +180,19 @@ Page({
 			url: '../searchResult/searchResult?url=' + encodeURIComponent(config.apiList.search.byTag) + '&keyword=' + keyword
 		})
 	},
+	viewFilmGraph: function() {
+		var film = this.data.filmDetail || {}
+		if (!film.id) {
+			wx.showToast({
+				title: '电影信息未加载完成',
+				icon: 'none'
+			})
+			return
+		}
+		wx.navigateTo({
+			url: '../filmGraph/filmGraph?movieId=' + film.id + '&title=' + encodeURIComponent(film.title || '')
+		})
+	},
 	onPullDownRefresh: function() {
 		var that = this
 		var id = that.data.filmDetail.id

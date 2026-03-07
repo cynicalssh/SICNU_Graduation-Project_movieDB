@@ -83,6 +83,15 @@
                     <view class="fd-bd-tag-item" data-tag="{{filmDetailTagItem}}" catchtap="viewFilmByTag">{{filmDetailTagItem}}</view>
                 </block>
             </view>
+
+            <view class="fd-graph-entry" bindtap="viewFilmGraph">
+                <view class="fd-graph-entry-icon">图</view>
+                <view class="fd-graph-entry-info">
+                    <view class="fd-graph-entry-title">知识图谱关系</view>
+                    <view class="fd-graph-entry-sub">导演 / 演员 / 类型 / 系列电影</view>
+                </view>
+                <view class="fd-graph-entry-arrow">›</view>
+            </view>
             
             <!-- 评分 -->
             <view class="fd-bd-title">评分</view>

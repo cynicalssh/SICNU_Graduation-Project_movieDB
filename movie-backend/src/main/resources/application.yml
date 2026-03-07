@@ -23,6 +23,11 @@ wechat:
   appid:   # 留空则使用测试模式，不调用微信接口
   secret:  # 留空则使用测试模式，不调用微信接口
 
+# TMDB配置（用于电影知识图谱关系）
+tmdb:
+  base-url: https://api.themoviedb.org/3
+  api-key: ${TMDB_API_KEY:ea9d76ccb9ae9639d229cfda8cda1bec}
+
 logging:
   level:
     root: INFO

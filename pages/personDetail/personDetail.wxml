@@ -1,33 +1,140 @@
-<view class="container">
-    <block wx:if="{{showLoading}}">
-        <view class="loading">玩命加载中…</view>
-    </block>
-    <block wx:elif="{{showContent}}">
-        <!-- pd: person detail -->
-        <view class="pd-hd">
-            <view class="pd-hd-bg" style="background-image: url({{personDetail.avatars.medium}})"></view>
-            <view class="pd-intro">
-                <view class="pd-avatar" style="background-image: url({{personDetail.avatars.medium}})"></view>
-                <view class="pd-name-cn">{{personDetail.name}}</view>
-                <view class="pd-name-en">{{personDetail.name_en}}</view>
-                <view class="pd-address">{{personDetail.born_place}}</view>
-            </view>
-            <view class="pd-favorite {{isPersonFavorite ? 'pd-favorite-active' : ''}}" bindtap="favoritePerson">收藏</view>
+<view class="pd-page">
+  <block wx:if="{{showLoading}}">
+    <view class="pd-loading-shell">
+      <view class="pd-loading-hero shimmer"></view>
+      <view class="pd-loading-card shimmer"></view>
+      <view class="pd-loading-card shimmer"></view>
+    </view>
+  </block>
+
+  <block wx:elif="{{loadError}}">
+    <view class="pd-error-wrap">
+      <view class="pd-error-title">加载失败</view>
+      <view class="pd-error-text">{{loadError}}</view>
+      <view class="pd-error-btn" bindtap="retryLoad">点击重试</view>
+    </view>
+  </block>
+
+  <block wx:elif="{{showContent}}">
+    <view class="pd-hero">
+      <image class="pd-hero-bg" src="{{personDetail.avatars.large || personDetail.avatars.medium || '/resource/logo.png'}}" mode="aspectFill"></image>
+      <view class="pd-hero-mask"></view>
+      <view class="pd-hero-content">
+        <image class="pd-avatar" src="{{personDetail.avatars.medium || '/resource/logo.png'}}" mode="aspectFill"></image>
+        <view class="pd-name-cn">{{personDetail.name}}</view>
+        <view class="pd-name-en" wx:if="{{personDetail.name_en}}">{{personDetail.name_en}}</view>
+        <view class="pd-meta">{{personDetail.known_for_department}} · {{personDetail.born_place}}</view>
+
+        <view class="pd-action-row">
+          <view class="pd-favorite {{isPersonFavorite ? 'pd-favorite-active' : ''}}" bindtap="favoritePerson">
+            {{isPersonFavorite ? '已收藏' : '收藏'}}
+          </view>
+          <view class="pd-hero-link" wx:if="{{links.length > 0}}" data-url="{{links[0].url}}" bindtap="copyLink">博客/主页</view>
         </view>
-        <view class="pd-bd">
-            <view class="pd-work">
-                <block wx:for="{{personDetail.works}}" wx:for-item="psersonWorkItem" wx:key="psersonWorkItem">
-                    <view class="pd-work-item" data-id="{{psersonWorkItem.subject.id}}" bindtap="viewFilmDetail">
-                        <image class="pd-work-cover" src="{{psersonWorkItem.subject.images.large}}"></image>
-                        <view class="pd-work-intro">
-                            <view class="pd-work-title">{{psersonWorkItem.subject.title}}</view>
-                            <view class="pd-work-roles">担任：{{psersonWorkItem.roles}}</view>
-                        </view>
-                    </view>
-                </block>
-            </view>
+      </view>
+    </view>
+
+    <view class="pd-body">
+      <view class="pd-stat-grid">
+        <view class="pd-stat-item">
+          <view class="pd-stat-label">生日</view>
+          <view class="pd-stat-value">{{personDetail.birthday}}</view>
         </view>
-    </block>
+        <view class="pd-stat-item">
+          <view class="pd-stat-label">作品</view>
+          <view class="pd-stat-value">{{works.length || (castCount + crewCount)}} 部</view>
+        </view>
+        <view class="pd-stat-item">
+          <view class="pd-stat-label">参演/幕后</view>
+          <view class="pd-stat-value">{{castCount}} / {{crewCount}}</view>
+        </view>
+      </view>
+
+      <view class="pd-section">
+        <view class="pd-section-title">简介</view>
+        <view class="pd-intro-text">
+          {{briefExpanded ? (personDetail.summary || '暂无简介') : (personDetail.summary_short || '暂无简介')}}
+        </view>
+        <view class="pd-intro-toggle" wx:if="{{personDetail.summary && personDetail.summary.length > 110}}" bindtap="toggleBrief">
+          {{briefExpanded ? '收起' : '展开全文'}}
+        </view>
+      </view>
+
+      <view class="pd-section" wx:if="{{links.length > 0}}">
+        <view class="pd-section-title">外部链接</view>
+        <view class="pd-link-list">
+          <view
+            class="pd-link-chip"
+            wx:for="{{links}}"
+            wx:key="label"
+            data-url="{{item.url}}"
+            bindtap="copyLink"
+          >
+            {{item.label}}
+          </view>
+        </view>
+      </view>
+
+      <view class="pd-section">
+        <view class="pd-section-title-row">
+          <view class="pd-section-title">影视作品</view>
+          <view class="pd-section-sub">共 {{works.length}} 部</view>
+        </view>
+        <block wx:if="{{works.length > 0}}">
+          <scroll-view scroll-x class="pd-work-scroll" show-scrollbar="false" enhanced="true">
+            <view class="pd-work-row">
+              <view
+                class="pd-work-card"
+                wx:for="{{works}}"
+                wx:key="id"
+                data-id="{{item.id}}"
+                bindtap="viewFilmDetail"
+              >
+                <image class="pd-work-cover" wx:if="{{item.posterUrl}}" src="{{item.posterUrl}}" mode="aspectFill"></image>
+                <view class="pd-work-cover pd-work-cover-empty" wx:else>暂无海报</view>
+                <view class="pd-work-title">{{item.title}}</view>
+                <view class="pd-work-meta">{{item.year || '未知年份'}} · {{item.roleText}}</view>
+                <view class="pd-work-rate">★ {{item.rating}}</view>
+              </view>
+            </view>
+          </scroll-view>
+        </block>
+        <view class="pd-empty-tip" wx:else>暂无作品数据</view>
+      </view>
+
+      <view class="pd-section pd-album-section">
+        <view class="pd-section-title-row">
+          <view class="pd-section-title pd-album-title">视频 / 剧照</view>
+          <view class="pd-section-sub pd-album-sub">全部 {{photos.length}} ></view>
+        </view>
+        <block wx:if="{{photos.length > 0}}">
+          <scroll-view
+            class="pd-photo-scroll"
+            scroll-x
+            show-scrollbar="false"
+            enhanced="true"
+          >
+            <view
+              class="pd-photo-strip"
+            >
+              <view
+              class="pd-photo-card"
+              wx:for="{{photos}}"
+              wx:key="url"
+              data-index="{{index}}"
+              bindtap="previewPhoto"
+              >
+                <image
+                  class="pd-photo-item"
+                  src="{{item.thumb || item.url}}"
+                  mode="aspectFill"
+                ></image>
+              </view>
+            </view>
+          </scroll-view>
+        </block>
+        <view class="pd-empty-tip pd-album-empty" wx:else>暂无相册图片</view>
+      </view>
+    </view>
+  </block>
 </view>
-<import src="../../component/message/message.wxml"/>
-<template is="message" data="{{message: message}}"/>

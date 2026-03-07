@@ -19,6 +19,8 @@ var backendApiUrl = 'http://localhost:8080/api'
 
 // 是否启用后端数据同步（如果后端未启动，设置为false可避免错误提示）
 var enableBackendSync = true  // 设置为true启用后端同步，false则仅使用本地存储
+// 是否启用后端知识图谱接口（开发阶段若后端未就绪建议关闭，避免404）
+var useBackendGraphApi = false
 
 // ========== TMDB API 配置 ==========
 // TMDB API基础地址
@@ -53,6 +55,7 @@ module.exports = {
     amapKey: '9dfa3c1150ad05258c5626ffe10c227a',  // 高德地图Key（免费申请：https://console.amap.com/dev/key/app）
     backendApiUrl: backendApiUrl,
     enableBackendSync: enableBackendSync,
+    useBackendGraphApi: useBackendGraphApi,
     tmdbApiKey: tmdbApiKey,
     apiList: {
         popular: tmdbApiList.popular,
@@ -73,7 +76,13 @@ module.exports = {
         baiduMap: 'https://api.map.baidu.com/geocoder/v2/',
         tencentMap: 'https://apis.map.qq.com/ws/geocoder/v1/',  // 腾讯地图逆地理编码API
         amapGeocode: 'https://restapi.amap.com/v3/geocode/regeo',  // 高德地图逆地理编码API
-        amapPlaceAround: 'https://restapi.amap.com/v3/place/around'  // 高德地图周边搜索API
+        amapPlaceAround: 'https://restapi.amap.com/v3/place/around',  // 高德地图周边搜索API
+        graph: {
+            relation: backendApiUrl + '/graph/relation',
+            personFilms: backendApiUrl + '/graph/person/',
+            genreFilms: backendApiUrl + '/graph/genre/',
+            seriesFilms: backendApiUrl + '/graph/series/'
+        }
     },
     hotKeyword: ['功夫熊猫', '烈日灼心', '摆渡人', '长城', '我不是潘金莲', '这个杀手不太冷', '驴得水', '海贼王之黄金城', '西游伏妖片', '我在故宫修文物', '你的名字'],
     hotTag: ['动作', '喜剧', '爱情', '悬疑'],
