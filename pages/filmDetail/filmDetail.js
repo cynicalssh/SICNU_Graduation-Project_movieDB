@@ -437,6 +437,12 @@ Page({
 				}
 				processed.isExpanded = false
 				processed.needsExpand = needsExpand
+				processed.translationLoading = false
+				processed.showTranslated = false
+				processed.originalName = processed.name || ''
+				processed.originalDescription = processed.description || ''
+				processed.translatedName = ''
+				processed.translatedDescription = ''
 				return processed
 			})
 			
@@ -474,6 +480,237 @@ Page({
 		var updateKey = 'discussions[' + index + '].isExpanded'
 		that.setData({
 			[updateKey]: !discussion.isExpanded
+		})
+	},
+	// 翻译讨论正文（英文 -> 中文）
+	toggleDiscussionTranslation: function(e) {
+		var that = this
+		var index = e.currentTarget.dataset.index
+		var discussions = that.data.discussions || []
+		var discussion = discussions[index]
+		if (!discussion) {
+			return
+		}
+		if (discussion.translationLoading) {
+			return
+		}
+		var basePath = 'discussions[' + index + ']'
+		var originalName = discussion.originalName || discussion.name || ''
+		var originalDescription = discussion.originalDescription || discussion.description || ''
+		// 已展示译文时，点击切回原文
+		if (discussion.showTranslated) {
+			var originalNeedsExpand = originalDescription && originalDescription.length > 150
+			that.setData({
+				[basePath + '.name']: originalName,
+				[basePath + '.description']: originalDescription,
+				[basePath + '.showTranslated']: false,
+				[basePath + '.needsExpand']: originalNeedsExpand,
+				[basePath + '.isExpanded']: originalNeedsExpand ? discussion.isExpanded : false
+			})
+			return
+		}
+		// 已有译文缓存则直接展示（标题+正文一起替换）
+		if (discussion.translatedName || discussion.translatedDescription) {
+			var cacheTitle = discussion.translatedName || originalName
+			var cacheDesc = discussion.translatedDescription || originalDescription
+			var cacheNeedsExpand = cacheDesc && cacheDesc.length > 150
+			that.setData({
+				[basePath + '.name']: cacheTitle,
+				[basePath + '.description']: cacheDesc,
+				[basePath + '.showTranslated']: true,
+				[basePath + '.needsExpand']: cacheNeedsExpand,
+				[basePath + '.isExpanded']: cacheNeedsExpand ? discussion.isExpanded : false
+			})
+			return
+		}
+		if (!originalName && !originalDescription) {
+			wx.showToast({
+				title: '暂无可翻译内容',
+				icon: 'none'
+			})
+			return
+		}
+		that.setData({
+			[basePath + '.translationLoading']: true
+		})
+		that.translateTextToChinese(originalName, function(translatedTitle) {
+			that.translateTextToChinese(originalDescription, function(translatedDesc) {
+				var displayTitle = translatedTitle || originalName
+				var displayDesc = translatedDesc || originalDescription
+				var translatedNeedsExpand = displayDesc && displayDesc.length > 150
+				that.setData({
+					[basePath + '.translationLoading']: false,
+					[basePath + '.translatedName']: displayTitle,
+					[basePath + '.translatedDescription']: displayDesc,
+					[basePath + '.name']: displayTitle,
+					[basePath + '.description']: displayDesc,
+					[basePath + '.showTranslated']: true,
+					[basePath + '.needsExpand']: translatedNeedsExpand,
+					[basePath + '.isExpanded']: translatedNeedsExpand ? discussion.isExpanded : false
+				})
+			}, function() {
+				that.setData({
+					[basePath + '.translationLoading']: false
+				})
+				wx.showToast({
+					title: '翻译失败',
+					icon: 'none'
+				})
+			})
+		}, function() {
+			that.setData({
+				[basePath + '.translationLoading']: false
+			})
+			wx.showToast({
+				title: '翻译失败',
+				icon: 'none'
+			})
+		})
+	},
+	decodeHtmlEntities: function(text) {
+		var content = String(text || '')
+		content = content.replace(/<br\s*\/?>/ig, '\n')
+		content = content.replace(/&quot;/g, '"')
+		content = content.replace(/&#39;/g, "'")
+		content = content.replace(/&amp;/g, '&')
+		content = content.replace(/&lt;/g, '<')
+		content = content.replace(/&gt;/g, '>')
+		content = content.replace(/&nbsp;/g, ' ')
+		content = content.replace(/&#(\d+);/g, function(_, code) {
+			var n = parseInt(code, 10)
+			return isNaN(n) ? '' : String.fromCharCode(n)
+		})
+		return content
+	},
+	translateTextToChinese: function(sourceText, successCb, failCb) {
+		var that = this
+		var text = String(sourceText || '').trim()
+		if (!text) {
+			typeof successCb === 'function' && successCb('')
+			return
+		}
+		// 公共翻译接口通常有单次长度限制，按片段翻译后拼接
+		var segmentSize = 380
+		var segments = []
+		for (var i = 0; i < text.length; i += segmentSize) {
+			segments.push(text.slice(i, i + segmentSize))
+		}
+		var translatedSegments = []
+		var segIndex = 0
+		var requestNext = function() {
+			if (segIndex >= segments.length) {
+				typeof successCb === 'function' && successCb(translatedSegments.join(''))
+				return
+			}
+			var segment = segments[segIndex]
+			var requestUrl = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(segment) + '&langpair=en|zh-CN'
+			wx.request({
+				url: requestUrl,
+				method: 'GET',
+				timeout: 12000,
+				success: function(res) {
+					if (res.statusCode !== 200 || !res.data) {
+						typeof failCb === 'function' && failCb('翻译服务暂不可用')
+						return
+					}
+					var translated = ''
+					if (res.data.responseData && res.data.responseData.translatedText) {
+						translated = that.decodeHtmlEntities(res.data.responseData.translatedText)
+					} else if (res.data.matches && res.data.matches.length > 0 && res.data.matches[0].translation) {
+						translated = that.decodeHtmlEntities(res.data.matches[0].translation)
+					}
+					if (!translated) {
+						typeof failCb === 'function' && failCb('翻译结果为空')
+						return
+					}
+					translatedSegments.push(translated)
+					segIndex += 1
+					requestNext()
+				},
+				fail: function(err) {
+					var msg = '翻译请求失败'
+					if (err && err.errMsg) {
+						if (err.errMsg.indexOf('not in domain list') !== -1 || err.errMsg.indexOf('域名') !== -1) {
+							msg = '请配置合法域名：api.mymemory.translated.net'
+						} else if (err.errMsg.indexOf('timeout') !== -1) {
+							msg = '翻译请求超时，请稍后重试'
+						}
+					}
+					typeof failCb === 'function' && failCb(msg)
+				}
+			})
+		}
+		requestNext()
+	},
+	// 翻译某条回复正文（直接替换正文显示）
+	toggleReplyTranslation: function(e) {
+		var that = this
+		var discussionIndex = e.currentTarget.dataset.discussionIndex
+		var replyIndex = e.currentTarget.dataset.replyIndex
+		if (discussionIndex === undefined || replyIndex === undefined) {
+			return
+		}
+		var discussions = that.data.discussions || []
+		var discussion = discussions[discussionIndex]
+		if (!discussion || !Array.isArray(discussion.replies)) {
+			return
+		}
+		var reply = discussion.replies[replyIndex]
+		if (!reply) {
+			return
+		}
+		if (reply.translationLoading) {
+			return
+		}
+		var basePath = 'discussions[' + discussionIndex + '].replies[' + replyIndex + ']'
+		var originalContent = reply.originalContent || reply.content || ''
+		if (!originalContent) {
+			wx.showToast({
+				title: '暂无可翻译内容',
+				icon: 'none'
+			})
+			return
+		}
+		// 若当前已是译文，则切回原文
+		if (reply.showTranslated) {
+			that.setData({
+				[basePath + '.content']: originalContent,
+				[basePath + '.showTranslated']: false,
+				[basePath + '.translationError']: ''
+			})
+			return
+		}
+		// 已有译文缓存，直接切换显示
+		if (reply.translatedContent) {
+			that.setData({
+				[basePath + '.content']: reply.translatedContent,
+				[basePath + '.showTranslated']: true,
+				[basePath + '.translationError']: ''
+			})
+			return
+		}
+		that.setData({
+			[basePath + '.translationLoading']: true,
+			[basePath + '.translationError']: '',
+			[basePath + '.originalContent']: originalContent
+		})
+		that.translateTextToChinese(originalContent, function(translatedText) {
+			that.setData({
+				[basePath + '.translationLoading']: false,
+				[basePath + '.translatedContent']: translatedText,
+				[basePath + '.content']: translatedText,
+				[basePath + '.showTranslated']: true,
+				[basePath + '.translationError']: ''
+			})
+		}, function(errorMsg) {
+			that.setData({
+				[basePath + '.translationLoading']: false,
+				[basePath + '.translationError']: errorMsg || '翻译失败，请稍后重试'
+			})
+			wx.showToast({
+				title: '翻译失败',
+				icon: 'none'
+			})
 		})
 	},
 	// 切换回复显示/隐藏
@@ -528,8 +765,20 @@ Page({
 				console.log('Reddit API返回的回复数量:', replies ? replies.length : 0)
 				var repliesKey = 'discussions[' + index + '].replies'
 				var loadingKey = 'discussions[' + index + '].repliesLoading'
+				var normalizedReplies = (replies || []).map(function(reply) {
+					var normalized = {}
+					for (var k in reply) {
+						normalized[k] = reply[k]
+					}
+					normalized.originalContent = reply && reply.content ? reply.content : ''
+					normalized.translatedContent = ''
+					normalized.showTranslated = false
+					normalized.translationLoading = false
+					normalized.translationError = ''
+					return normalized
+				})
 				that.setData({
-					[repliesKey]: replies || [],  // 即使为空也使用空数组，不使用模拟数据
+					[repliesKey]: normalizedReplies,  // 即使为空也使用空数组，不使用模拟数据
 					[loadingKey]: false
 				})
 			})

@@ -3,15 +3,55 @@ var message = require('../../component/message/message')
 var tmdbAdapter = require('../../util/tmdbAdapter')
 var genreMap = require('../../util/genreMap')
 
+function getTodayDateStr() {
+  var now = new Date()
+  var y = now.getFullYear()
+  var m = ('0' + (now.getMonth() + 1)).slice(-2)
+  var d = ('0' + now.getDate()).slice(-2)
+  return y + '-' + m + '-' + d
+}
+
+function isUpcomingApi(url) {
+  return url === config.apiList.coming || url.indexOf('/movie/upcoming') !== -1
+}
+
+function filterUpcomingFilms(films) {
+  var today = getTodayDateStr()
+  return (films || []).filter(function(film) {
+    var releaseDate = film && film.release_date
+    if (!releaseDate || !/^\d{4}-\d{2}-\d{2}$/.test(releaseDate)) {
+      return false
+    }
+    return releaseDate >= today
+  })
+}
+
+function mergeFilmsById(currentFilms, newFilms) {
+  var list = (currentFilms || []).concat(newFilms || [])
+  var seen = {}
+  return list.filter(function(film) {
+    var id = film && film.id
+    if (id === undefined || id === null) {
+      return false
+    }
+    var key = String(id)
+    if (seen[key]) {
+      return false
+    }
+    seen[key] = true
+    return true
+  })
+}
+
 // 获取电影列表
 function fetchFilms(url, start, count, cb, fail_cb) {
   var that = this
   message.hide.call(that)
   if (that.data.hasMore) {
-    // TMDB使用page参数，每页20条，计算当前页码
+    var comingApi = isUpcomingApi(url)
     var page = Math.floor(start / config.count) + 1
     
-    // 构建TMDB API请求URL
+    // TMDB使用page参数，每页20条，计算当前页码
     var requestUrl = url + '?api_key=' + config.tmdbApiKey + '&language=zh-CN&page=' + page + '&region=CN'
     console.log('请求URL:', requestUrl)
     
@@ -24,22 +64,34 @@ function fetchFilms(url, start, count, cb, fail_cb) {
       timeout: 30000,  // 设置30秒超时
       success: function(res){
         console.log('TMDB API响应:', res)
-        // 检查响应数据格式
         if (res.statusCode === 200 && res.data && res.data.results) {
           // 转换TMDB数据格式为豆瓣格式
           var convertedData = tmdbAdapter.convertFilmListResponse(res.data)
+          if (comingApi) {
+            convertedData.subjects = filterUpcomingFilms(convertedData.subjects)
+          }
           
           if(convertedData.subjects.length === 0){
-            that.setData({
-              hasMore: false,
-              showLoading: false
-            })
+            // 待上映过滤后当前页可能为空，继续向后翻页直到结束
+            if (comingApi && res.data.page < res.data.total_pages) {
+              that.setData({
+                start: (that.data.start || 0) + config.count,
+                showLoading: false
+              })
+            } else {
+              that.setData({
+                hasMore: false,
+                showLoading: false
+              })
+            }
           }else{
             // 确保 films 是一个数组，防止 undefined.concat 错误
             var currentFilms = that.data.films || []
+            var mergedFilms = mergeFilmsById(currentFilms, convertedData.subjects)
+            var nextStart = (that.data.start || 0) + (comingApi ? config.count : convertedData.subjects.length)
             that.setData({
-              films: currentFilms.concat(convertedData.subjects),
-              start: (that.data.start || 0) + convertedData.subjects.length,
+              films: mergedFilms,
+              start: nextStart,
               showLoading: false
             })
             // 检查是否还有更多数据

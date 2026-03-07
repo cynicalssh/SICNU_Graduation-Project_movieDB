@@ -138,8 +138,21 @@
                                 <text bindtap="toggleDiscussionExpand" data-index="{{index}}">{{discussionItem.isExpanded ? '收起' : '展开全文'}}</text>
                             </view>
                             <view class="fd-discussion-footer">
-                                <text class="fd-discussion-replies {{discussionItem.showReplies ? 'active' : ''}}" bindtap="toggleReplies" data-index="{{index}}">💬 {{discussionItem.replies_count || discussionItem.comment_count || 0}} 条回复</text>
-                                <text class="fd-discussion-score" wx:if="{{discussionItem.score}}">👍 {{discussionItem.score}}</text>
+                                <view class="fd-discussion-replies {{discussionItem.showReplies ? 'active' : ''}}" bindtap="toggleReplies" data-index="{{index}}">💬 {{discussionItem.replies_count || discussionItem.comment_count || 0}} 条回复</view>
+                                <view class="fd-discussion-translate {{discussionItem.translationLoading ? 'is-loading' : ''}}" bindtap="toggleDiscussionTranslation" data-index="{{index}}">
+                                    <block wx:if="{{discussionItem.translationLoading}}">
+                                        <view class="fd-inline-loader">
+                                            <view class="fd-inline-loader-dot"></view>
+                                            <view class="fd-inline-loader-dot"></view>
+                                            <view class="fd-inline-loader-dot"></view>
+                                        </view>
+                                        <text>翻译中</text>
+                                    </block>
+                                    <block wx:else>
+                                        <text>{{discussionItem.showTranslated ? '原文' : '翻译'}}</text>
+                                    </block>
+                                </view>
+                                <view class="fd-discussion-score" wx:if="{{discussionItem.score}}">👍 {{discussionItem.score}}</view>
                             </view>
                             <!-- 回复列表 -->
                             <view class="fd-discussion-replies-list" wx:if="{{discussionItem.showReplies}}">
@@ -148,14 +161,30 @@
                                 </view>
                                 <block wx:else>
                                     <block wx:if="{{discussionItem.replies && discussionItem.replies.length > 0}}">
-                                        <view class="fd-reply-item" wx:for="{{discussionItem.replies}}" wx:for-item="replyItem" wx:key="replyItem.id">
+                                        <view class="fd-reply-item" wx:for="{{discussionItem.replies}}" wx:for-item="replyItem" wx:for-index="replyIndex" wx:key="replyItem.id">
                                             <view class="fd-reply-header">
                                                 <text class="fd-reply-author">{{replyItem.author}}</text>
                                                 <text class="fd-reply-date">{{dateUtil.formatReviewDate(replyItem.created_at)}}</text>
                                             </view>
                                             <view class="fd-reply-content">{{replyItem.content}}</view>
-                                            <view class="fd-reply-footer" wx:if="{{replyItem.score}}">
-                                                <text class="fd-reply-score">👍 {{replyItem.score}}</text>
+                                            <view class="fd-reply-translation-error" wx:if="{{replyItem.translationError}}">
+                                                {{replyItem.translationError}}
+                                            </view>
+                                            <view class="fd-reply-footer">
+                                                <text class="fd-reply-score" wx:if="{{replyItem.score}}">👍 {{replyItem.score}}</text>
+                                                <view class="fd-reply-translate {{replyItem.translationLoading ? 'is-loading' : ''}}" bindtap="toggleReplyTranslation" data-discussion-index="{{index}}" data-reply-index="{{replyIndex}}">
+                                                    <block wx:if="{{replyItem.translationLoading}}">
+                                                        <view class="fd-inline-loader fd-inline-loader-sm">
+                                                            <view class="fd-inline-loader-dot"></view>
+                                                            <view class="fd-inline-loader-dot"></view>
+                                                            <view class="fd-inline-loader-dot"></view>
+                                                        </view>
+                                                        <text>翻译中</text>
+                                                    </block>
+                                                    <block wx:else>
+                                                        <text>{{replyItem.showTranslated ? '原文' : '翻译'}}</text>
+                                                    </block>
+                                                </view>
                                             </view>
                                         </view>
                                     </block>
